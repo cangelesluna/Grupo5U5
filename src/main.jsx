@@ -14,6 +14,8 @@ import ClienteProductos from "./pages/client/ClienteProductos";
 import ClientePerfil from "./pages/client/ClientePerfil";
 
 import ClienteRoute from "./routes/ClienteRoute";
+
+import ProductsPage from "./pages/client/ProductsPage";
 import "./index.css";
 
 // Definimos las rutas
@@ -50,6 +52,14 @@ const router = createBrowserRouter([
         element: (
           <ClienteRoute>
             <ClientePerfil />
+          </ClienteRoute>
+        ),
+      },
+      {
+        path: "/cliente/products",
+        element: (
+          <ClienteRoute>
+            <ProductsPage />
           </ClienteRoute>
         ),
       },

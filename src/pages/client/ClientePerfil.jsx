@@ -1,4 +1,4 @@
-import { auth } from "../firebase";
+import { auth } from "../../lib/firebase";
 
 export default function ClientePerfil() {
   const user = auth.currentUser;
