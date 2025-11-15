@@ -8,6 +8,12 @@ import Contact from "./pages/Contact";
 import MisionVision from "./pages/MisionVision";
 import Inscripcion from "./pages/Inscripcion";
 import Catalog from "./pages/Catalog";
+
+import ClienteHome from "./pages/client/ClienteHome";
+import ClienteProductos from "./pages/client/ClienteProductos";
+import ClientePerfil from "./pages/client/ClientePerfil";
+
+import ClienteRoute from "./routes/ClienteRoute";
 import "./index.css";
 
 // Definimos las rutas
@@ -22,6 +28,31 @@ const router = createBrowserRouter([
       { path: "/mision-vision", element: <MisionVision /> },
       { path: "/inscripcion", element: <Inscripcion /> },
       { path: "/catalogo", element: <Catalog /> },
+
+      {
+        path: "/cliente",
+        element: (
+          <ClienteRoute>
+            <ClienteHome />
+          </ClienteRoute>
+        ),
+      },
+      {
+        path: "/cliente/productos",
+        element: (
+          <ClienteRoute>
+            <ClienteProductos />
+          </ClienteRoute>
+        ),
+      },
+      {
+        path: "/cliente/perfil",
+        element: (
+          <ClienteRoute>
+            <ClientePerfil />
+          </ClienteRoute>
+        ),
+      },
     ],
   },
 ]);
