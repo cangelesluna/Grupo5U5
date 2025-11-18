@@ -1,61 +1,125 @@
 // src/pages/Login.jsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
+import {
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  GoogleAuthProvider,
+  signInWithPopup,
+} from "firebase/auth";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db } from "../lib/firebase";
 
 export default function Login() {
+  const [isRegistering, setIsRegistering] = useState(false); // Toggle entre Login y Registro
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  // Campo extra solo para registro (opcional, pero recomendado)
+  const [nombre, setNombre] = useState("");
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
+  // --- Lógica para guardar usuario nuevo en Firestore ---
+  const registerUserInFirestore = async (uid, email, name) => {
+    const userRef = doc(db, "users", uid);
+    const userSnap = await getDoc(userRef);
+
+    // Si no existe el documento, lo creamos con rol por defecto
+    if (!userSnap.exists()) {
+      await setDoc(userRef, {
+        uid: uid,
+        email: email,
+        nombre: name || "Usuario",
+        rol: "cliente", // Rol por defecto
+        createdAt: new Date(),
+      });
+    }
+  };
+
+  // --- Manejo del formulario (Email/Pass) ---
+  const handleAuth = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
     try {
-      // 1) Autenticar
-      const cred = await signInWithEmailAndPassword(auth, email, password);
-      const user = cred.user;
+      let user;
 
-      // 2) Leer documento del usuario en Firestore
-      const userRef = doc(db, "users", user.uid);
-      const userSnap = await getDoc(userRef);
-
-      if (!userSnap.exists()) {
-        // No hay doc: cerrar sesión y mostrar error
-        await auth.signOut();
-        setError("Usuario no encontrado en la base de datos (sin rol). Contacta con soporte.");
-        setLoading(false);
-        return;
-      }
-
-      const data = userSnap.data();
-      const role = data.rol || data.role || data.tipo || null; // por si usan otro campo
-
-      // 3) Redirigir según rol (ajusta nombres si tu BD usa 'client' en vez de 'cliente')
-      if (role === "admin" || role === "administrator") {
-        navigate("/admin");
-      } else if (role === "editor") {
-        navigate("/editor");
+      if (isRegistering) {
+        // --- REGISTRO ---
+        const cred = await createUserWithEmailAndPassword(
+          auth,
+          email,
+          password
+        );
+        user = cred.user;
+        // Guardamos en BD
+        await registerUserInFirestore(user.uid, user.email, nombre);
+        // Redirigimos al perfil inmediatamente
+        navigate("/perfil");
       } else {
-        // Por defecto asumimos cliente
-        navigate("/cliente");
+        // --- LOGIN ---
+        const cred = await signInWithEmailAndPassword(auth, email, password);
+        user = cred.user;
+
+        // Verificamos rol para redirigir
+        const userRef = doc(db, "users", user.uid);
+        const userSnap = await getDoc(userRef);
+
+        if (!userSnap.exists()) {
+          throw new Error("Usuario sin datos en DB");
+        }
+
+        const data = userSnap.data();
+        const role = data.rol || "cliente";
+
+        if (role === "admin") navigate("/admin");
+        else navigate("/perfil");
       }
     } catch (err) {
-      console.error("Login error:", err);
-      // Mensajes amigables según error
-      if (err.code === "auth/wrong-password" || err.code === "auth/user-not-found") {
-        setError("Correo o contraseña incorrectos.");
-      } else if (err.code === "auth/invalid-email") {
-        setError("Correo inválido.");
-      } else {
-        setError("Error al iniciar sesión. Intenta nuevamente.");
-      }
+      console.error("Auth error:", err);
+      // Manejo de errores comunes
+      if (err.code === "auth/email-already-in-use")
+        setError("Este correo ya está registrado.");
+      else if (err.code === "auth/weak-password")
+        setError("La contraseña debe tener al menos 6 caracteres.");
+      else if (err.code === "auth/wrong-password")
+        setError("Contraseña incorrecta.");
+      else if (err.code === "auth/user-not-found")
+        setError("Usuario no encontrado.");
+      else setError("Ocurrió un error: " + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // --- Manejo de Google ---
+  const handleGoogleLogin = async () => {
+    setError("");
+    setLoading(true);
+    try {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+
+      // Verificar/Crear usuario en Firestore
+      // Pasamos el displayName que viene de Google
+      await registerUserInFirestore(user.uid, user.email, user.displayName);
+
+      // Chequear rol para redirigir correctamente
+      const userRef = doc(db, "users", user.uid);
+      const userSnap = await getDoc(userRef);
+      const data = userSnap.data();
+      const role = data?.rol || "cliente";
+
+      if (role === "admin") navigate("/admin");
+      else navigate("/perfil");
+    } catch (err) {
+      console.error("Google Auth Error:", err);
+      setError("Error al iniciar con Google.");
     } finally {
       setLoading(false);
     }
@@ -64,13 +128,27 @@ export default function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4">
       <div className="w-full max-w-md bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8">
-        <h1 className="text-2xl font-bold text-center mb-6">Iniciar sesión</h1>
+        <h1 className="text-2xl font-bold text-center mb-6 text-gray-800 dark:text-white">
+          {isRegistering ? "Crear cuenta" : "Iniciar sesión"}
+        </h1>
 
-        <form onSubmit={handleLogin} className="space-y-4">
+        <form onSubmit={handleAuth} className="space-y-4">
+          {/* Campo Nombre (Solo visible en Registro) */}
+          {isRegistering && (
+            <input
+              type="text"
+              placeholder="Nombre completo"
+              className="w-full border rounded px-3 py-2 bg-gray-100 dark:bg-gray-700 dark:text-white"
+              value={nombre}
+              onChange={(e) => setNombre(e.target.value)}
+              required
+            />
+          )}
+
           <input
             type="email"
             placeholder="Correo electrónico"
-            className="w-full border rounded px-3 py-2 bg-gray-100 dark:bg-gray-700"
+            className="w-full border rounded px-3 py-2 bg-gray-100 dark:bg-gray-700 dark:text-white"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -79,26 +157,78 @@ export default function Login() {
           <input
             type="password"
             placeholder="Contraseña"
-            className="w-full border rounded px-3 py-2 bg-gray-100 dark:bg-gray-700"
+            className="w-full border rounded px-3 py-2 bg-gray-100 dark:bg-gray-700 dark:text-white"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
           />
 
-          {error && <p className="text-sm text-red-500">{error}</p>}
+          {error && <p className="text-sm text-red-500 text-center">{error}</p>}
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2 rounded bg-pink-500 hover:bg-pink-600 text-white font-semibold disabled:opacity-60"
+            className="w-full py-2 rounded bg-pink-500 hover:bg-pink-600 text-white font-semibold disabled:opacity-60 transition"
           >
-            {loading ? "Entrando..." : "Entrar"}
+            {loading
+              ? "Procesando..."
+              : isRegistering
+              ? "Registrarse"
+              : "Entrar"}
           </button>
         </form>
 
-        <div className="mt-4 text-center text-sm text-gray-600 dark:text-gray-300">
-          ¿Olvidaste tu contraseña? <a href="/recover" className="text-pink-500 hover:underline">Recuperarla</a>
+        {/* Separador */}
+        <div className="relative my-6">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-gray-300 dark:border-gray-600"></div>
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="px-2 bg-white dark:bg-gray-800 text-gray-500">
+              O continúa con
+            </span>
+          </div>
         </div>
+
+        {/* Botón de Google */}
+        <button
+          onClick={handleGoogleLogin}
+          disabled={loading}
+          type="button"
+          className="w-full py-2 border border-gray-300 dark:border-gray-600 rounded flex items-center justify-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-700 transition text-gray-700 dark:text-white"
+        >
+          <img
+            src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+            alt="Google logo"
+            className="w-5 h-5"
+          />
+          <span>Google</span>
+        </button>
+
+        {/* Toggle entre Login y Registro */}
+        <div className="mt-6 text-center text-sm text-gray-600 dark:text-gray-300">
+          {isRegistering ? "¿Ya tienes cuenta? " : "¿No tienes cuenta? "}
+          <button
+            onClick={() => {
+              setIsRegistering(!isRegistering);
+              setError("");
+            }}
+            className="text-pink-500 hover:underline font-semibold"
+          >
+            {isRegistering ? "Inicia sesión" : "Regístrate aquí"}
+          </button>
+        </div>
+
+        {!isRegistering && (
+          <div className="mt-2 text-center text-sm">
+            <a
+              href="/recover"
+              className="text-gray-400 hover:text-gray-600 text-xs"
+            >
+              ¿Olvidaste tu contraseña?
+            </a>
+          </div>
+        )}
       </div>
     </div>
   );

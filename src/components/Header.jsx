@@ -1,9 +1,13 @@
 import { Link, NavLink } from "react-router-dom";
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { FaSun, FaMoon } from "react-icons/fa";
+import { AuthContext } from "../context/AuthContext"; // AJUSTA la ruta si es distinta
 
 function Header({ isDark, setIsDark }) {
   const [menuOpen, setMenuOpen] = useState(false);
+
+  // 🚀 TOMAMOS LOS DATOS DEL CONTEXTO
+  const { usuario, loading } = useContext(AuthContext);
 
   return (
     <header className="fixed top-0 left-0 w-full z-50 bg-gradient-to-r from-pink-500 to-pink-400 dark:from-gray-900 dark:to-gray-800 text-white shadow-md transition-colors duration-500">
@@ -60,7 +64,7 @@ function Header({ isDark, setIsDark }) {
             Inscripción
           </NavLink>
 
-          {/* 🌿 Nueva sección Catálogo */}
+          {/* Catálogo */}
           <NavLink
             to="./catalogo"
             className={({ isActive }) =>
@@ -83,13 +87,23 @@ function Header({ isDark, setIsDark }) {
             Contacto
           </NavLink>
 
-          <Link
-            to="/login"
-            className="ml-4 px-4 py-2 bg-white text-pink-600 font-semibold rounded-lg shadow hover:bg-gray-200 transition"
-          >
-            Iniciar sesión
-          </Link>
-
+          {/* 🚀 LOGIN / PERFIL */}
+          {!loading &&
+            (usuario ? (
+              <Link
+                to="/perfil"
+                className="ml-4 px-4 py-2 bg-white text-pink-600 font-semibold rounded-lg shadow hover:bg-gray-200 transition"
+              >
+                Mi Perfil
+              </Link>
+            ) : (
+              <Link
+                to="/login"
+                className="ml-4 px-4 py-2 bg-white text-pink-600 font-semibold rounded-lg shadow hover:bg-gray-200 transition"
+              >
+                Iniciar sesión
+              </Link>
+            ))}
 
           {/* Botón modo oscuro */}
           <button
@@ -162,8 +176,6 @@ function Header({ isDark, setIsDark }) {
           >
             Inscripción
           </NavLink>
-
-          {/* 🌿 Nueva sección Catálogo en móvil */}
           <NavLink
             to="./catalogo"
             onClick={() => setMenuOpen(false)}
@@ -171,7 +183,6 @@ function Header({ isDark, setIsDark }) {
           >
             Catálogo
           </NavLink>
-
           <NavLink
             to="./contact"
             onClick={() => setMenuOpen(false)}
@@ -180,13 +191,25 @@ function Header({ isDark, setIsDark }) {
             Contacto
           </NavLink>
 
-          <Link
-            to="/login"
-            onClick={() => setMenuOpen(false)}
-            className="block mt-2 px-4 py-2 bg-white text-pink-600 font-semibold rounded-lg shadow hover:bg-gray-200 transition"
-          >
-            Iniciar sesión
-          </Link>
+          {/* 🚀 LOGIN / PERFIL (móvil) */}
+          {!loading &&
+            (usuario ? (
+              <Link
+                to="/perfil"
+                onClick={() => setMenuOpen(false)}
+                className="block mt-2 px-4 py-2 bg-white text-pink-600 font-semibold rounded-lg shadow hover:bg-gray-200 transition"
+              >
+                Mi Perfil
+              </Link>
+            ) : (
+              <Link
+                to="/login"
+                onClick={() => setMenuOpen(false)}
+                className="block mt-2 px-4 py-2 bg-white text-pink-600 font-semibold rounded-lg shadow hover:bg-gray-200 transition"
+              >
+                Iniciar sesión
+              </Link>
+            ))}
 
           {/* Botón modo oscuro móvil */}
           <button

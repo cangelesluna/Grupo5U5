@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { auth } from "../../lib/firebase";
+import { auth } from "../lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { Navigate } from "react-router-dom";
 
-export default function ClienteRoute({ children }) {
+export default function ProtectedRoute({ children }) {
   const [user, setUser] = useState(undefined);
 
   useEffect(() => {

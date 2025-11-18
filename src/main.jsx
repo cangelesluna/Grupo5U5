@@ -9,9 +9,9 @@ import MisionVision from "./pages/MisionVision";
 import Inscripcion from "./pages/Inscripcion";
 import Catalog from "./pages/Catalog";
 
-import ClienteHome from "./pages/client/ClienteHome";
-import ClienteProductos from "./pages/client/ClienteProductos";
-import ClientePerfil from "./pages/client/ClientePerfil";
+import ClienteHome from "./components/ProtectedRoute";
+
+import Profile from "./pages/Profile";
 
 import "./index.css";
 
@@ -32,10 +32,10 @@ const router = createBrowserRouter([
       { path: "/catalogo", element: <Catalog /> },
       { path: "/login", element: <Login /> },
 
+      { path: "/perfil", element: <Profile /> },
+
       // Rutas de cliente
       { path: "/cliente", element: <ClienteHome /> },
-      { path: "/cliente/productos", element: <ClienteProductos /> },
-      { path: "/cliente/perfil", element: <ClientePerfil /> },
     ],
   },
 ]);
