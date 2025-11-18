@@ -1,8 +1,10 @@
+
+
 import { useState, useEffect } from "react";
 import { Outlet } from "react-router-dom";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
-
+import AdminRoute from "./pages/AdminRoute";
 function App() {
   // 🌙 Estado del modo oscuro
   const [isDark, setIsDark] = useState(() => {
@@ -36,3 +38,5 @@ function App() {
 }
 
 export default App;
+
+

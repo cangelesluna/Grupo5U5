@@ -172,6 +172,18 @@ function Header({ isDark, setIsDark }) {
             Contacto
           </NavLink>
 
+               <NavLink
+            to="./Login"
+            onClick={() => setMenuOpen(false)}
+            className="block hover:underline underline-offset-4"
+          >
+            Administrador
+          </NavLink>
+
+
+
+
+
           {/* Botón modo oscuro móvil */}
           <button
             onClick={() => setIsDark(!isDark)}
