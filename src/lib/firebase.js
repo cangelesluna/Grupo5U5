@@ -8,7 +8,6 @@ import { getStorage } from "firebase/storage";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
-// Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyCXu4krSX5BzeiGvTKxcVw9gTwSV-KkeAc",
   authDomain: "proyecto-fitlife-u4.firebaseapp.com",
@@ -18,7 +17,6 @@ const firebaseConfig = {
   appId: "1:330516709810:web:ac0da804cb94e7dbe6e4ab"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
 export const db = getFirestore(app);

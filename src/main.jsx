@@ -13,6 +13,9 @@ import MisionVision from "./pages/MisionVision";
 import Inscripcion from "./pages/Inscripcion";
 import Catalog from "./pages/Catalog";
 
+import ClienteHome from "./components/ProtectedRoute";
+
+import Profile from "./pages/Profile";
 // Páginas admin
 
 import Dashboard from "./pages/Dashboard";
@@ -35,6 +38,18 @@ const router = createBrowserRouter([
     path: "/",
     element: <App />, // Layout principal con Header + Footer
     children: [
+      { path: "/", element: <Home /> },
+      { path: "/about", element: <About /> },
+      { path: "/contact", element: <Contact /> },
+      { path: "/mision-vision", element: <MisionVision /> },
+      { path: "/inscripcion", element: <Inscripcion /> },
+      { path: "/catalogo", element: <Catalog /> },
+      { path: "/login", element: <Login /> },
+
+      { path: "/perfil", element: <Profile /> },
+
+      // Rutas de cliente
+      { path: "/cliente", element: <ClienteHome /> },
       { index: true, element: <Home /> },
       { path: "about", element: <About /> },
       { path: "contact", element: <Contact /> },
