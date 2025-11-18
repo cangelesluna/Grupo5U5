@@ -18,6 +18,9 @@ import ClienteRoute from "./routes/ClienteRoute";
 import ProductsPage from "./pages/client/ProductsPage";
 import "./index.css";
 
+import { AuthProvider } from "./context/AuthContext";
+import Login from "./pages/Login";
+
 // Definimos las rutas
 const router = createBrowserRouter([
   {
@@ -30,6 +33,7 @@ const router = createBrowserRouter([
       { path: "/mision-vision", element: <MisionVision /> },
       { path: "/inscripcion", element: <Inscripcion /> },
       { path: "/catalogo", element: <Catalog /> },
+      { path: "/login", element: <Login /> },
 
       {
         path: "/cliente",
@@ -69,5 +73,7 @@ const router = createBrowserRouter([
 
 // Render principal
 ReactDOM.createRoot(document.getElementById("root")).render(
-  <RouterProvider router={router} />
+  <AuthProvider>
+    <RouterProvider router={router} />
+  </AuthProvider>
 );

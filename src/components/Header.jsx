@@ -83,6 +83,14 @@ function Header({ isDark, setIsDark }) {
             Contacto
           </NavLink>
 
+          <Link
+            to="/login"
+            className="ml-4 px-4 py-2 bg-white text-pink-600 font-semibold rounded-lg shadow hover:bg-gray-200 transition"
+          >
+            Iniciar sesión
+          </Link>
+
+
           {/* Botón modo oscuro */}
           <button
             onClick={() => setIsDark(!isDark)}
@@ -171,6 +179,14 @@ function Header({ isDark, setIsDark }) {
           >
             Contacto
           </NavLink>
+
+          <Link
+            to="/login"
+            onClick={() => setMenuOpen(false)}
+            className="block mt-2 px-4 py-2 bg-white text-pink-600 font-semibold rounded-lg shadow hover:bg-gray-200 transition"
+          >
+            Iniciar sesión
+          </Link>
 
           {/* Botón modo oscuro móvil */}
           <button
