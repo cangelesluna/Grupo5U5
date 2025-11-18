@@ -10,6 +10,7 @@ export const AuthProvider = ({ children }) => {
   const [cliente, setCliente] = useState(null);
   const [planAlimentacion, setPlanAlimentacion] = useState(null);
   const [planEjercicio, setPlanEjercicio] = useState(null);
+  const [metas, setMetas] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -50,6 +51,11 @@ export const AuthProvider = ({ children }) => {
       const planESnap = await getDoc(planERef);
       setPlanEjercicio(planESnap.data());
 
+      // METAS
+      const metasRef = doc(db, "metas", clienteData.metasId);
+      const metasSnap = await getDoc(metasRef);
+      setMetas(metasSnap.data());
+
       setLoading(false);
     });
   }, []);
@@ -61,6 +67,7 @@ export const AuthProvider = ({ children }) => {
         cliente,
         planAlimentacion,
         planEjercicio,
+        metas,
         loading,
       }}
     >

@@ -15,6 +15,10 @@ import ClientePerfil from "./pages/client/ClientePerfil";
 
 import "./index.css";
 
+import { AuthProvider } from "./context/AuthContext";
+import Login from "./pages/Login";
+
+// Definimos las rutas
 const router = createBrowserRouter([
   {
     path: "/",
@@ -26,6 +30,7 @@ const router = createBrowserRouter([
       { path: "/mision-vision", element: <MisionVision /> },
       { path: "/inscripcion", element: <Inscripcion /> },
       { path: "/catalogo", element: <Catalog /> },
+      { path: "/login", element: <Login /> },
 
       // Rutas de cliente
       { path: "/cliente", element: <ClienteHome /> },
@@ -36,5 +41,7 @@ const router = createBrowserRouter([
 ]);
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  <RouterProvider router={router} />
+  <AuthProvider>
+    <RouterProvider router={router} />
+  </AuthProvider>
 );
