@@ -13,12 +13,8 @@ import ClienteHome from "./pages/client/ClienteHome";
 import ClienteProductos from "./pages/client/ClienteProductos";
 import ClientePerfil from "./pages/client/ClientePerfil";
 
-import ClienteRoute from "./routes/ClienteRoute";
-
-import ProductsPage from "./pages/client/ProductsPage";
 import "./index.css";
 
-// Definimos las rutas
 const router = createBrowserRouter([
   {
     path: "/",
@@ -31,43 +27,14 @@ const router = createBrowserRouter([
       { path: "/inscripcion", element: <Inscripcion /> },
       { path: "/catalogo", element: <Catalog /> },
 
-      {
-        path: "/cliente",
-        element: (
-          <ClienteRoute>
-            <ClienteHome />
-          </ClienteRoute>
-        ),
-      },
-      {
-        path: "/cliente/productos",
-        element: (
-          <ClienteRoute>
-            <ClienteProductos />
-          </ClienteRoute>
-        ),
-      },
-      {
-        path: "/cliente/perfil",
-        element: (
-          <ClienteRoute>
-            <ClientePerfil />
-          </ClienteRoute>
-        ),
-      },
-      {
-        path: "/cliente/products",
-        element: (
-          <ClienteRoute>
-            <ProductsPage />
-          </ClienteRoute>
-        ),
-      },
+      // Rutas de cliente
+      { path: "/cliente", element: <ClienteHome /> },
+      { path: "/cliente/productos", element: <ClienteProductos /> },
+      { path: "/cliente/perfil", element: <ClientePerfil /> },
     ],
   },
 ]);
 
-// Render principal
 ReactDOM.createRoot(document.getElementById("root")).render(
   <RouterProvider router={router} />
 );

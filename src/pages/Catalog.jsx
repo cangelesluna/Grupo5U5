@@ -1,11 +1,26 @@
 import React, { useState } from "react";
 import catalogo from "../data/catalogo.json";
+import { auth } from "../lib/firebase";
+import { addPlanToUser } from "../pages/services/userPlans";
 
 const Catalogo = () => {
   const [busquedaEntrenamiento, setBusquedaEntrenamiento] = useState("");
   const [nivelFiltro, setNivelFiltro] = useState("todos");
   const [busquedaComida, setBusquedaComida] = useState("");
   const [dietaFiltro, setDietaFiltro] = useState("todos");
+
+  // ⭐ Función para guardar un plan en firestore
+  const seleccionarPlan = async (planId) => {
+    const user = auth.currentUser;
+
+    if (!user) {
+      alert("Debes iniciar sesión para seleccionar un plan.");
+      return;
+    }
+
+    await addPlanToUser(user.uid, planId);
+    alert("Plan agregado correctamente a tu perfil.");
+  };
 
   // 🏋️ Filtrado de entrenamientos
   const entrenamientos = catalogo.filter(
@@ -36,7 +51,7 @@ const Catalogo = () => {
           Catálogo de Planes
         </h2>
 
-        {/* ===================== 🏋️ ENTRENAMIENTOS ===================== */}
+        {/* ===================== ENTRENAMIENTOS ===================== */}
         <div className="mb-16">
           <h3 className="text-2xl font-semibold text-center text-pink-900 dark:text-pink-500 mb-6">
             Planes de Entrenamiento
@@ -49,12 +64,12 @@ const Catalogo = () => {
               placeholder="Buscar entrenamiento..."
               value={busquedaEntrenamiento}
               onChange={(e) => setBusquedaEntrenamiento(e.target.value)}
-              className="w-full sm:w-1/2 border border-pink-800 dark:border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-pink-400 dark:bg-gray-800 dark:text-gray-100"
+              className="w-full sm:w-1/2 border border-pink-800 dark:border-gray-600 rounded-lg px-4 py-2"
             />
             <select
               value={nivelFiltro}
               onChange={(e) => setNivelFiltro(e.target.value)}
-              className="w-full sm:w-1/3 border border-pink-800 dark:border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-pink-400 dark:bg-gray-800 dark:text-gray-100"
+              className="w-full sm:w-1/3 border border-pink-800 dark:border-gray-600 rounded-lg px-4 py-2"
             >
               <option value="todos">Todos los niveles</option>
               <option value="Principiante">Principiante</option>
@@ -76,17 +91,26 @@ const Catalogo = () => {
                     alt={item.titulo}
                     className="w-full h-40 object-cover"
                   />
+
                   <div className="p-5">
-                    <h4 className="text-xl font-semibold text-fuchsia-800 dark:text-gray-500 mb-2">
+                    <h4 className="text-xl font-semibold text-fuchsia-800 dark:text-gray-300 mb-2">
                       {item.titulo}
                     </h4>
                     <p className="text-gray-700 dark:text-gray-200 mb-3">
                       {item.descripcion}
                     </p>
+
                     <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400">
                       <span>⭐ {item.nivel}</span>
                       <span>⏱️ {item.duracion}</span>
                     </div>
+
+                    <button
+                      className="mt-4 w-full bg-pink-600 hover:bg-pink-700 text-white py-2 rounded-lg"
+                      onClick={() => seleccionarPlan(item.id)}
+                    >
+                      Seleccionar plan
+                    </button>
                   </div>
                 </div>
               ))}
@@ -98,7 +122,7 @@ const Catalogo = () => {
           )}
         </div>
 
-        {/* ===================== 🥗 COMIDAS ===================== */}
+        {/* ===================== COMIDAS ===================== */}
         <div>
           <h3 className="text-2xl font-semibold text-center text-pink-900 dark:text-pink-600 mb-6">
             Planes de Alimentación Saludable
@@ -111,12 +135,12 @@ const Catalogo = () => {
               placeholder="Buscar plan de comida..."
               value={busquedaComida}
               onChange={(e) => setBusquedaComida(e.target.value)}
-              className="w-full sm:w-1/2 border border-pink-900 dark:border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-400 dark:bg-gray-800 dark:text-gray-100"
+              className="w-full sm:w-1/2 border border-pink-900 dark:border-gray-600 rounded-lg px-4 py-2"
             />
             <select
               value={dietaFiltro}
               onChange={(e) => setDietaFiltro(e.target.value)}
-              className="w-full sm:w-1/3 border border-pink-900 dark:border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-400 dark:bg-gray-800 dark:text-gray-100"
+              className="w-full sm:w-1/3 border border-pink-900 dark:border-gray-600 rounded-lg px-4 py-2"
             >
               <option value="todos">Todas las dietas</option>
               <option value="Detox">Detox</option>
@@ -139,17 +163,26 @@ const Catalogo = () => {
                     alt={item.titulo}
                     className="w-full h-40 object-cover"
                   />
+
                   <div className="p-5">
-                    <h4 className="text-xl font-semibold text-pink-800 dark:text-gray-500 mb-2">
+                    <h4 className="text-xl font-semibold text-pink-800 dark:text-gray-300 mb-2">
                       {item.titulo}
                     </h4>
                     <p className="text-gray-700 dark:text-gray-200 mb-3">
                       {item.descripcion}
                     </p>
+
                     <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400">
                       <span>🥗 {item.dieta}</span>
                       <span>⏱️ {item.duracion}</span>
                     </div>
+
+                    <button
+                      className="mt-4 w-full bg-pink-600 hover:bg-pink-700 text-white py-2 rounded-lg"
+                      onClick={() => seleccionarPlan(item.id)}
+                    >
+                      Seleccionar plan
+                    </button>
                   </div>
                 </div>
               ))}
