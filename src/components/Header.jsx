@@ -210,6 +210,17 @@ function Header({ isDark, setIsDark }) {
                 Iniciar sesión
               </Link>
             ))}
+               <NavLink
+            to="./Login"
+            onClick={() => setMenuOpen(false)}
+            className="block hover:underline underline-offset-4"
+          >
+            Administrador
+          </NavLink>
+
+
+
+
 
           {/* Botón modo oscuro móvil */}
           <button
