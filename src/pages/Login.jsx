@@ -1,5 +1,5 @@
 // src/pages/Login.jsx
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   signInWithEmailAndPassword,
@@ -9,37 +9,35 @@ import {
 } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db } from "../lib/firebase";
+import { AuthContext } from "../context/AuthContext"; // 🔹 IMPORTAR CONTEXTO
 
 export default function Login() {
-  const [isRegistering, setIsRegistering] = useState(false); // Toggle entre Login y Registro
+  const [isRegistering, setIsRegistering] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
-  // Campo extra solo para registro (opcional, pero recomendado)
-  const [nombre, setNombre] = useState("");
-
+  const [nombre, setNombre] = useState(""); // Solo para registro
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  // --- Lógica para guardar usuario nuevo en Firestore ---
+  const { setUsuario } = useContext(AuthContext); // 🔹 OBTENER EL SETTER
+
+  // --- Guardar usuario en Firestore ---
   const registerUserInFirestore = async (uid, email, name) => {
     const userRef = doc(db, "users", uid);
     const userSnap = await getDoc(userRef);
 
-    // Si no existe el documento, lo creamos con rol por defecto
     if (!userSnap.exists()) {
       await setDoc(userRef, {
-        uid: uid,
-        email: email,
+        uid,
+        email,
         nombre: name || "Usuario",
-        rol: "cliente", // Rol por defecto
+        rol: "cliente",
         createdAt: new Date(),
       });
     }
   };
 
-  // --- Manejo del formulario (Email/Pass) ---
   const handleAuth = async (e) => {
     e.preventDefault();
     setError("");
@@ -56,32 +54,36 @@ export default function Login() {
           password
         );
         user = cred.user;
-        // Guardamos en BD
+
+        // Guardar en Firestore
         await registerUserInFirestore(user.uid, user.email, nombre);
-        // Redirigimos al perfil inmediatamente
+
+        // Actualizar contexto
+        setUsuario(user);
+
+        // Redirigir
         navigate("/perfil");
       } else {
         // --- LOGIN ---
         const cred = await signInWithEmailAndPassword(auth, email, password);
         user = cred.user;
 
-        // Verificamos rol para redirigir
+        // Actualizar contexto
+        setUsuario(user);
+
+        // Verificar rol
         const userRef = doc(db, "users", user.uid);
         const userSnap = await getDoc(userRef);
-
-        if (!userSnap.exists()) {
-          throw new Error("Usuario sin datos en DB");
-        }
+        if (!userSnap.exists()) throw new Error("Usuario sin datos en DB");
 
         const data = userSnap.data();
-        const role = data.rol || "cliente";
+        const role = data?.rol || "cliente";
 
         if (role === "admin") navigate("/admin");
         else navigate("/perfil");
       }
     } catch (err) {
       console.error("Auth error:", err);
-      // Manejo de errores comunes
       if (err.code === "auth/email-already-in-use")
         setError("Este correo ya está registrado.");
       else if (err.code === "auth/weak-password")
@@ -96,7 +98,6 @@ export default function Login() {
     }
   };
 
-  // --- Manejo de Google ---
   const handleGoogleLogin = async () => {
     setError("");
     setLoading(true);
@@ -105,11 +106,13 @@ export default function Login() {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
 
-      // Verificar/Crear usuario en Firestore
-      // Pasamos el displayName que viene de Google
+      // Guardar/Actualizar en Firestore
       await registerUserInFirestore(user.uid, user.email, user.displayName);
 
-      // Chequear rol para redirigir correctamente
+      // Actualizar contexto
+      setUsuario(user);
+
+      // Redirigir según rol
       const userRef = doc(db, "users", user.uid);
       const userSnap = await getDoc(userRef);
       const data = userSnap.data();
@@ -133,7 +136,6 @@ export default function Login() {
         </h1>
 
         <form onSubmit={handleAuth} className="space-y-4">
-          {/* Campo Nombre (Solo visible en Registro) */}
           {isRegistering && (
             <input
               type="text"
@@ -144,7 +146,6 @@ export default function Login() {
               required
             />
           )}
-
           <input
             type="email"
             placeholder="Correo electrónico"
@@ -153,7 +154,6 @@ export default function Login() {
             onChange={(e) => setEmail(e.target.value)}
             required
           />
-
           <input
             type="password"
             placeholder="Contraseña"
@@ -162,9 +162,7 @@ export default function Login() {
             onChange={(e) => setPassword(e.target.value)}
             required
           />
-
           {error && <p className="text-sm text-red-500 text-center">{error}</p>}
-
           <button
             type="submit"
             disabled={loading}
@@ -190,7 +188,7 @@ export default function Login() {
           </div>
         </div>
 
-        {/* Botón de Google */}
+        {/* Google */}
         <button
           onClick={handleGoogleLogin}
           disabled={loading}
@@ -205,7 +203,6 @@ export default function Login() {
           <span>Google</span>
         </button>
 
-        {/* Toggle entre Login y Registro */}
         <div className="mt-6 text-center text-sm text-gray-600 dark:text-gray-300">
           {isRegistering ? "¿Ya tienes cuenta? " : "¿No tienes cuenta? "}
           <button

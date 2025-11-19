@@ -1,20 +1,22 @@
-import { doc, getDoc, setDoc, updateDoc, arrayUnion } from "firebase/firestore";
+import { doc, getDoc, updateDoc, arrayUnion } from "firebase/firestore";
 import { db } from "../../lib/firebase";
 
+// ⭐ Agregar un plan seleccionado al usuario
 export async function addPlanToUser(uid, planId) {
   const userRef = doc(db, "users", uid);
 
-  await setDoc(userRef, { selectedPlans: [] }, { merge: true });
-
   await updateDoc(userRef, {
-    selectedPlans: arrayUnion(planId),
+    planesSeleccionados: arrayUnion(planId),
   });
 }
 
+// ⭐ Obtener los planes seleccionados del usuario
 export async function getUserPlans(uid) {
-  const ref = doc(db, "users", uid);
-  const snap = await getDoc(ref);
+  const userRef = doc(db, "users", uid);
+  const snap = await getDoc(userRef);
 
   if (!snap.exists()) return [];
-  return snap.data().selectedPlans || [];
+
+  const data = snap.data();
+  return data.planesSeleccionados || [];
 }

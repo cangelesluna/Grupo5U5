@@ -1,13 +1,17 @@
-
-
-import React from "react";
+import React, { useContext } from "react";
 import { Navigate } from "react-router-dom";
-import { auth } from "../lib/firebase.js";
+import { AuthContext } from "../context/AuthContext";
 
 const AdminRoute = ({ children }) => {
-  const user = auth.currentUser;
+  const { usuario, cliente, loading } = useContext(AuthContext);
 
-  if (!user) return <Navigate to="/login" replace />;
+  // Mientras se cargan los datos, no mostramos nada
+  if (loading) return null;
+
+  // Si no hay usuario o el rol no es admin, redirigimos
+  if (!usuario || cliente?.rol !== "admin") {
+    return <Navigate to="/login" replace />;
+  }
 
   return children;
 };

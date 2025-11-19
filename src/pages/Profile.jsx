@@ -1,22 +1,19 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { auth, db } from "../lib/firebase"; // Ajusta la ruta si es necesario
+import { auth, db } from "../lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 
-// --- IMPORTS DE TU LÓGICA DE PLANES ---
-// Ajusta estas rutas según dónde tengas guardados estos archivos realmente
-import { getUserPlans } from "./services/userPlans"; // Ejemplo: si está en pages/services/
-import catalogo from "../data/catalogo.json"; // Ejemplo: si está en src/data/
+import { getUserPlans } from "./services/userPlans";
+import catalogo from "../data/catalogo.json";
 
 export default function Profile() {
   const [userData, setUserData] = useState(null);
-  const [planes, setPlanes] = useState([]); // Estado para los IDs de los planes
+  const [planes, setPlanes] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Escuchar estado de autenticación
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (!currentUser) {
         navigate("/login");
@@ -24,15 +21,25 @@ export default function Profile() {
       }
 
       try {
-        // 1. Obtener datos del Usuario (Firestore)
+        // Obtener datos del usuario
         const docRef = doc(db, "users", currentUser.uid);
         const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          setUserData(docSnap.data());
+        if (!docSnap.exists()) {
+          setUserData(null);
+          setLoading(false);
+          return;
         }
 
-        // 2. Obtener planes del Usuario (Tu lógica importada)
-        // Asumimos que getUserPlans devuelve una promesa con los IDs
+        const data = docSnap.data();
+        setUserData(data);
+
+        // Si es admin, redirige a dashboard
+        if (data.rol === "admin") {
+          navigate("/admin/dashboard");
+          return;
+        }
+
+        // Obtener planes del usuario
         const misPlanesIds = await getUserPlans(currentUser.uid);
         setPlanes(misPlanesIds || []);
       } catch (error) {
@@ -50,7 +57,6 @@ export default function Profile() {
     navigate("/login");
   };
 
-  // --- Lógica para convertir IDs a Objetos del Catálogo ---
   const planesInfo = planes
     .map((id) => catalogo.find((p) => p.id === id))
     .filter(Boolean);
@@ -61,7 +67,7 @@ export default function Profile() {
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-4xl mx-auto space-y-6">
-        {/* TARJETA 1: Datos del Usuario */}
+        {/* Datos del usuario */}
         <div className="bg-white rounded-xl shadow p-6">
           <div className="flex justify-between items-center mb-4">
             <h1 className="text-3xl font-bold text-gray-800">Mi Perfil</h1>
@@ -97,7 +103,7 @@ export default function Profile() {
           )}
         </div>
 
-        {/* TARJETA 2: Planes/Cursos (Tu lógica de ClientePerfil) */}
+        {/* Planes del usuario */}
         <div className="bg-white rounded-xl shadow p-6">
           <h2 className="text-2xl font-bold mb-4 text-gray-800 border-b pb-2">
             Mis Planes Contratados
@@ -107,7 +113,7 @@ export default function Profile() {
             <div className="text-center py-8 text-gray-500">
               <p>No tienes planes activos actualmente.</p>
               <button
-                onClick={() => navigate("/catalogo")} // O a donde vendas los planes
+                onClick={() => navigate("/catalogo")}
                 className="mt-4 text-pink-500 hover:underline"
               >
                 Ver catálogo de planes

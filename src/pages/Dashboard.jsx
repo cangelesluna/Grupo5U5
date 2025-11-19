@@ -1,50 +1,52 @@
+import React, { useContext, useState } from "react";
+import Sidebar from "./Sidebar";
+import Header from "../components/Header";
+import { auth } from "../lib/firebase";
+import { signOut } from "firebase/auth";
+import { useNavigate, Outlet } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
 
-
-
-import React from 'react'
-import Sidebar from './Sidebar'
-import PlanList from './PlanList'
-import { auth } from '../lib/firebase'
-import { signOut } from 'firebase/auth'
-import { useNavigate } from 'react-router-dom'
-
-export default function Dashboard({ user }) {
-  const navigate = useNavigate()
+export default function Dashboard() {
+  const navigate = useNavigate();
+  const { usuario } = useContext(AuthContext);
+  const [isDark, setIsDark] = useState(false);
 
   const logout = async () => {
-    await signOut(auth)
-    navigate('/login')
-  }
+    await signOut(auth);
+    navigate("/login");
+  };
 
   return (
-    <div className="flex min-h-screen bg-gray-100">
+    <div className={`flex min-h-screen ${isDark ? "dark" : ""} bg-gray-100`}>
       {/* SIDEBAR */}
       <Sidebar />
 
-      {/* MAIN PANEL */}
-      <main className="flex-1 p-8">
+      {/* PANEL PRINCIPAL */}
+      <div className="flex-1 flex flex-col">
         {/* HEADER */}
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h1 className="text-2xl font-bold">👋 ¡Hola, Administradora!</h1>
-            <p className="text-sm text-gray-600">
-              Bienvenida al panel de control — puedes gestionar tus planes aquí.
-            </p>
+        <Header isDark={isDark} setIsDark={setIsDark} />
+
+        {/* MAIN CONTENT */}
+        <main className="flex-1 p-8 mt-24">
+          {/* SALUDO Y CERRAR SESIÓN */}
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-2xl font-bold">
+              👋 Hola, {usuario?.displayName || "Administradora"}!
+            </h1>
+            <button
+              onClick={logout}
+              className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg shadow-sm transition"
+            >
+              Cerrar sesión
+            </button>
           </div>
 
-          <button
-            onClick={logout}
-            className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg shadow-sm transition"
-          >
-            Cerrar sesión
-          </button>
-        </div>
-
-        {/* CONTENT */}
-        <div className="bg-white p-6 rounded-xl shadow-sm">
-          <PlanList />
-        </div>
-      </main>
+          {/* CONTENIDO DINÁMICO SEGÚN RUTA */}
+          <div className="bg-white p-6 rounded-xl shadow-sm">
+            <Outlet />
+          </div>
+        </main>
+      </div>
     </div>
-  )
+  );
 }
