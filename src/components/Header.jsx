@@ -1,19 +1,24 @@
 import { Link, NavLink } from "react-router-dom";
 import { useState, useContext } from "react";
 import { FaSun, FaMoon } from "react-icons/fa";
-import { AuthContext } from "../context/AuthContext"; // AJUSTA la ruta si es distinta
+import { AuthContext } from "../context/AuthContext"; // Ajusta la ruta si es distinta
 
 function Header({ isDark, setIsDark }) {
   const [menuOpen, setMenuOpen] = useState(false);
 
-  // 🚀 TOMAMOS LOS DATOS DEL CONTEXTO
-  const { usuario, loading } = useContext(AuthContext);
+  const {
+    usuario = null,
+    cliente = null,
+    loading = true,
+  } = useContext(AuthContext) || {};
+
+  const isAdmin = cliente?.rol === "admin";
 
   return (
     <header className="fixed top-0 left-0 w-full z-50 bg-gradient-to-r from-pink-500 to-pink-400 dark:from-gray-900 dark:to-gray-800 text-white shadow-md transition-colors duration-500">
       <div className="container mx-auto flex items-center justify-between px-4 py-0">
         {/* Logo */}
-        <Link to="./">
+        <Link to="/">
           <img
             src="/src/assets/logo.png"
             alt="FitLife Logo"
@@ -24,7 +29,7 @@ function Header({ isDark, setIsDark }) {
         {/* Navegación escritorio */}
         <nav className="hidden md:flex items-center space-x-6 text-lg">
           <NavLink
-            to="./"
+            to="/"
             className={({ isActive }) =>
               isActive
                 ? "font-semibold underline underline-offset-4"
@@ -34,7 +39,7 @@ function Header({ isDark, setIsDark }) {
             Inicio
           </NavLink>
           <NavLink
-            to="./about"
+            to="/about"
             className={({ isActive }) =>
               isActive
                 ? "font-semibold underline underline-offset-4"
@@ -44,7 +49,7 @@ function Header({ isDark, setIsDark }) {
             Sobre nosotras
           </NavLink>
           <NavLink
-            to="./mision-vision"
+            to="/mision-vision"
             className={({ isActive }) =>
               isActive
                 ? "font-semibold underline underline-offset-4"
@@ -54,7 +59,7 @@ function Header({ isDark, setIsDark }) {
             Misión y Visión
           </NavLink>
           <NavLink
-            to="./inscripcion"
+            to="/inscripcion"
             className={({ isActive }) =>
               isActive
                 ? "font-semibold underline underline-offset-4"
@@ -63,10 +68,8 @@ function Header({ isDark, setIsDark }) {
           >
             Inscripción
           </NavLink>
-
-          {/* Catálogo */}
           <NavLink
-            to="./catalogo"
+            to="/catalogo"
             className={({ isActive }) =>
               isActive
                 ? "font-semibold underline underline-offset-4"
@@ -75,9 +78,8 @@ function Header({ isDark, setIsDark }) {
           >
             Catálogo
           </NavLink>
-
           <NavLink
-            to="./contact"
+            to="/contact"
             className={({ isActive }) =>
               isActive
                 ? "font-semibold underline underline-offset-4"
@@ -87,15 +89,24 @@ function Header({ isDark, setIsDark }) {
             Contacto
           </NavLink>
 
-          {/* 🚀 LOGIN / PERFIL */}
+          {/* 🚀 LOGIN / PERFIL / ADMIN */}
           {!loading &&
             (usuario ? (
-              <Link
-                to="/perfil"
-                className="ml-4 px-4 py-2 bg-white text-pink-600 font-semibold rounded-lg shadow hover:bg-gray-200 transition"
-              >
-                Mi Perfil
-              </Link>
+              isAdmin ? (
+                <Link
+                  to="/admin/dashboard"
+                  className="ml-4 px-4 py-2 bg-white text-pink-600 font-semibold rounded-lg shadow hover:bg-gray-200 transition"
+                >
+                  Panel Admin
+                </Link>
+              ) : (
+                <Link
+                  to="/perfil"
+                  className="ml-4 px-4 py-2 bg-white text-pink-600 font-semibold rounded-lg shadow hover:bg-gray-200 transition"
+                >
+                  Mi Perfil
+                </Link>
+              )
             ) : (
               <Link
                 to="/login"
@@ -149,58 +160,68 @@ function Header({ isDark, setIsDark }) {
       {menuOpen && (
         <div className="md:hidden bg-gradient-to-br from-pink-400 to-pink-300 dark:from-gray-900 dark:to-gray-800 text-center py-4 space-y-3 transition-colors duration-500 shadow-lg">
           <NavLink
-            to="./"
+            to="/"
             onClick={() => setMenuOpen(false)}
             className="block hover:underline underline-offset-4"
           >
             Inicio
           </NavLink>
           <NavLink
-            to="./about"
+            to="/about"
             onClick={() => setMenuOpen(false)}
             className="block hover:underline underline-offset-4"
           >
             Sobre nosotras
           </NavLink>
           <NavLink
-            to="./mision-vision"
+            to="/mision-vision"
             onClick={() => setMenuOpen(false)}
             className="block hover:underline underline-offset-4"
           >
             Misión y Visión
           </NavLink>
           <NavLink
-            to="./inscripcion"
+            to="/inscripcion"
             onClick={() => setMenuOpen(false)}
             className="block hover:underline underline-offset-4"
           >
             Inscripción
           </NavLink>
           <NavLink
-            to="./catalogo"
+            to="/catalogo"
             onClick={() => setMenuOpen(false)}
             className="block hover:underline underline-offset-4"
           >
             Catálogo
           </NavLink>
           <NavLink
-            to="./contact"
+            to="/contact"
             onClick={() => setMenuOpen(false)}
             className="block hover:underline underline-offset-4"
           >
             Contacto
           </NavLink>
 
-          {/* 🚀 LOGIN / PERFIL (móvil) */}
+          {/* 🚀 LOGIN / PERFIL / ADMIN móvil */}
           {!loading &&
             (usuario ? (
-              <Link
-                to="/perfil"
-                onClick={() => setMenuOpen(false)}
-                className="block mt-2 px-4 py-2 bg-white text-pink-600 font-semibold rounded-lg shadow hover:bg-gray-200 transition"
-              >
-                Mi Perfil
-              </Link>
+              isAdmin ? (
+                <Link
+                  to="/admin/dashboard"
+                  onClick={() => setMenuOpen(false)}
+                  className="block mt-2 px-4 py-2 bg-white text-pink-600 font-semibold rounded-lg shadow hover:bg-gray-200 transition"
+                >
+                  Panel Admin
+                </Link>
+              ) : (
+                <Link
+                  to="/perfil"
+                  onClick={() => setMenuOpen(false)}
+                  className="block mt-2 px-4 py-2 bg-white text-pink-600 font-semibold rounded-lg shadow hover:bg-gray-200 transition"
+                >
+                  Mi Perfil
+                </Link>
+              )
             ) : (
               <Link
                 to="/login"
@@ -210,17 +231,6 @@ function Header({ isDark, setIsDark }) {
                 Iniciar sesión
               </Link>
             ))}
-               <NavLink
-            to="./Login"
-            onClick={() => setMenuOpen(false)}
-            className="block hover:underline underline-offset-4"
-          >
-            Administrador
-          </NavLink>
-
-
-
-
 
           {/* Botón modo oscuro móvil */}
           <button

@@ -1,13 +1,18 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import catalogo from "../data/catalogo.json";
 import { auth } from "../lib/firebase";
 import { addPlanToUser } from "../pages/services/userPlans";
+import { AuthContext } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const Catalogo = () => {
   const [busquedaEntrenamiento, setBusquedaEntrenamiento] = useState("");
   const [nivelFiltro, setNivelFiltro] = useState("todos");
   const [busquedaComida, setBusquedaComida] = useState("");
   const [dietaFiltro, setDietaFiltro] = useState("todos");
+
+  const { rol } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   // ⭐ Función para guardar un plan en firestore
   const seleccionarPlan = async (planId) => {
@@ -107,9 +112,13 @@ const Catalogo = () => {
 
                     <button
                       className="mt-4 w-full bg-pink-600 hover:bg-pink-700 text-white py-2 rounded-lg"
-                      onClick={() => seleccionarPlan(item.id)}
+                      onClick={() =>
+                        rol === "admin"
+                          ? navigate(`/admin/editar-plan/${item.id}`)
+                          : seleccionarPlan(item.id)
+                      }
                     >
-                      Seleccionar plan
+                      {rol === "admin" ? "Editar plan" : "Seleccionar plan"}
                     </button>
                   </div>
                 </div>
@@ -179,9 +188,13 @@ const Catalogo = () => {
 
                     <button
                       className="mt-4 w-full bg-pink-600 hover:bg-pink-700 text-white py-2 rounded-lg"
-                      onClick={() => seleccionarPlan(item.id)}
+                      onClick={() =>
+                        rol === "admin"
+                          ? navigate(`/admin/editar-plan/${item.id}`)
+                          : seleccionarPlan(item.id)
+                      }
                     >
-                      Seleccionar plan
+                      {rol === "admin" ? "Editar plan" : "Seleccionar plan"}
                     </button>
                   </div>
                 </div>

@@ -11,63 +11,89 @@ export const AuthProvider = ({ children }) => {
   const [planAlimentacion, setPlanAlimentacion] = useState(null);
   const [planEjercicio, setPlanEjercicio] = useState(null);
   const [metas, setMetas] = useState(null);
+  const [rol, setRol] = useState("cliente"); // ✅ rol por defecto
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    onAuthStateChanged(auth, async (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (!user) {
         setUsuario(null);
         setCliente(null);
         setPlanAlimentacion(null);
         setPlanEjercicio(null);
+        setMetas(null);
+        setRol("cliente");
         setLoading(false);
         return;
       }
 
       setUsuario(user);
 
-      // USERS
-      const userRef = doc(db, "users", user.uid);
-      const userSnap = await getDoc(userRef);
-      const { clienteId, rol } = userSnap.data();
+      try {
+        // --- Datos del usuario en Firestore ---
+        const userRef = doc(db, "users", user.uid);
+        const userSnap = await getDoc(userRef);
+        const userData = userSnap.exists() ? userSnap.data() : {};
 
-      // CLIENTE
-      const clienteRef = doc(db, "clientes", clienteId);
-      const clienteSnap = await getDoc(clienteRef);
-      const clienteData = clienteSnap.data();
-      setCliente({ ...clienteData, rol });
+        const userRol = userData.rol || "cliente";
+        setRol(userRol);
 
-      // PLAN ALIMENTACIÓN
-      const planARef = doc(
-        db,
-        "planesAlimentacion",
-        clienteData.planAlimentacionId
-      );
-      const planASnap = await getDoc(planARef);
-      setPlanAlimentacion(planASnap.data());
+        const clienteId = userData.clienteId || user.uid;
 
-      // PLAN EJERCICIO
-      const planERef = doc(db, "planesEjercicio", clienteData.planEjercicioId);
-      const planESnap = await getDoc(planERef);
-      setPlanEjercicio(planESnap.data());
+        // --- Datos del cliente ---
+        const clienteRef = doc(db, "clientes", clienteId);
+        const clienteSnap = await getDoc(clienteRef);
+        const clienteData = clienteSnap.exists() ? clienteSnap.data() : {};
+        setCliente({ ...clienteData, rol: userRol });
 
-      // METAS
-      const metasRef = doc(db, "metas", clienteData.metasId);
-      const metasSnap = await getDoc(metasRef);
-      setMetas(metasSnap.data());
+        // --- Plan de alimentación ---
+        if (clienteData.planAlimentacionId) {
+          const planARef = doc(
+            db,
+            "planesAlimentacion",
+            clienteData.planAlimentacionId
+          );
+          const planASnap = await getDoc(planARef);
+          setPlanAlimentacion(planASnap.exists() ? planASnap.data() : null);
+        } else setPlanAlimentacion(null);
 
-      setLoading(false);
+        // --- Plan de ejercicio ---
+        if (clienteData.planEjercicioId) {
+          const planERef = doc(
+            db,
+            "planesEjercicio",
+            clienteData.planEjercicioId
+          );
+          const planESnap = await getDoc(planERef);
+          setPlanEjercicio(planESnap.exists() ? planESnap.data() : null);
+        } else setPlanEjercicio(null);
+
+        // --- Metas ---
+        if (clienteData.metasId) {
+          const metasRef = doc(db, "metas", clienteData.metasId);
+          const metasSnap = await getDoc(metasRef);
+          setMetas(metasSnap.exists() ? metasSnap.data() : null);
+        } else setMetas(null);
+      } catch (error) {
+        console.error("Error cargando datos del usuario:", error);
+      } finally {
+        setLoading(false);
+      }
     });
+
+    return () => unsubscribe();
   }, []);
 
   return (
     <AuthContext.Provider
       value={{
         usuario,
+        setUsuario,
         cliente,
         planAlimentacion,
         planEjercicio,
         metas,
+        rol, // ✅ exponemos el rol directamente
         loading,
       }}
     >
