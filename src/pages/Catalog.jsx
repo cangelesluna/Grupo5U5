@@ -1,20 +1,37 @@
-import React, { useState, useContext } from "react";
-import catalogo from "../data/catalogo.json";
-import { auth } from "../lib/firebase";
+import React, { useState, useContext, useEffect } from "react";
+import { auth, db } from "../lib/firebase";
 import { addPlanToUser } from "../pages/services/userPlans";
 import { AuthContext } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { collection, getDocs } from "firebase/firestore";
 
 const Catalogo = () => {
+  const [planes, setPlanes] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   const [busquedaEntrenamiento, setBusquedaEntrenamiento] = useState("");
   const [nivelFiltro, setNivelFiltro] = useState("todos");
+
   const [busquedaComida, setBusquedaComida] = useState("");
   const [dietaFiltro, setDietaFiltro] = useState("todos");
 
   const { rol } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  // ⭐ Función para guardar un plan en firestore
+  // ⭐ Cargar planes desde Firestore
+  useEffect(() => {
+    async function cargarPlanes() {
+      const colRef = collection(db, "plans");
+      const snap = await getDocs(colRef);
+      const data = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      setPlanes(data);
+      setLoading(false);
+    }
+
+    cargarPlanes();
+  }, []);
+
+  // ⭐ Guardar plan en el usuario
   const seleccionarPlan = async (planId) => {
     const user = auth.currentUser;
 
@@ -27,10 +44,10 @@ const Catalogo = () => {
     alert("Plan agregado correctamente a tu perfil.");
   };
 
-  // 🏋️ Filtrado de entrenamientos
-  const entrenamientos = catalogo.filter(
-    (item) => item.tipo === "entrenamiento"
-  );
+  if (loading) return <p>Cargando catálogo...</p>;
+
+  // =============== FILTROS ===============
+  const entrenamientos = planes.filter((item) => item.tipo === "entrenamiento");
   const resultadosEntrenamiento = entrenamientos.filter((item) => {
     const coincideBusqueda = item.titulo
       .toLowerCase()
@@ -39,8 +56,7 @@ const Catalogo = () => {
     return coincideBusqueda && coincideNivel;
   });
 
-  // 🥗 Filtrado de comidas
-  const comidas = catalogo.filter((item) => item.tipo === "comida");
+  const comidas = planes.filter((item) => item.tipo === "comida");
   const resultadosComida = comidas.filter((item) => {
     const coincideBusqueda = item.titulo
       .toLowerCase()

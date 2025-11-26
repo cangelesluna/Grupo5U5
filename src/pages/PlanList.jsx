@@ -8,24 +8,40 @@ export default function PlanList() {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  // ========================================================
+  // 🔹 Cargar todos los planes
+  // ========================================================
   useEffect(() => {
     async function loadPlans() {
-      const colRef = collection(db, "plans");
-      const snap = await getDocs(colRef);
-      setPlans(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
-      setLoading(false);
+      try {
+        const colRef = collection(db, "plans");
+        const snap = await getDocs(colRef);
+
+        const data = snap.docs.map((d) => ({
+          id: d.id,
+          ...d.data(),
+        }));
+
+        setPlans(data);
+      } catch (err) {
+        console.error("Error cargando planes:", err);
+      } finally {
+        setLoading(false);
+      }
     }
+
     loadPlans();
   }, []);
 
-  const handleCrearPlan = () => {
-    navigate("/admin/crear-plan");
-  };
+  // ========================================================
+  // 🔹 Navegación
+  // ========================================================
+  const handleCrearPlan = () => navigate("/admin/crear-plan");
+  const handleEditarPlan = (id) => navigate(`/admin/editar-plan/${id}`);
 
-  const handleEditarPlan = (id) => {
-    navigate(`/admin/editar-plan/${id}`);
-  };
-
+  // ========================================================
+  // 🔹 Eliminar plan
+  // ========================================================
   const handleEliminarPlan = async (id) => {
     const confirmacion = window.confirm(
       "¿Seguro que quieres eliminar este plan?"
@@ -33,11 +49,21 @@ export default function PlanList() {
     if (!confirmacion) return;
 
     await deleteDoc(doc(db, "plans", id));
-    setPlans(plans.filter((p) => p.id !== id));
+    setPlans((prev) => prev.filter((p) => p.id !== id));
+  };
+
+  // ========================================================
+  // 🔹 Fallback para imágenes
+  // ========================================================
+  const validarImagen = (url) => {
+    if (!url || typeof url !== "string") return false;
+    if (url.trim() === "") return false;
+    return true;
   };
 
   return (
-    <div>
+    <div className="text-gray-900 dark:text-gray-200">
+      {/* Header */}
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold">
           📌 Planes de entrenamiento y dieta
@@ -50,6 +76,7 @@ export default function PlanList() {
         </button>
       </div>
 
+      {/* Contenido */}
       {loading ? (
         <div>Cargando planes...</div>
       ) : (
@@ -57,42 +84,55 @@ export default function PlanList() {
           {plans.map((p) => (
             <div
               key={p.id}
-              className="bg-white rounded-xl shadow hover:shadow-lg transition overflow-hidden"
+              className="bg-white dark:bg-gray-800 rounded-xl shadow dark:shadow-gray-900 hover:shadow-lg dark:hover:shadow-gray-700 transition overflow-hidden"
             >
-              {/* Imagen */}
-              <div className="h-40 w-full overflow-hidden">
+              {/* 🔹 Imagen */}
+              <div className="h-40 w-full overflow-hidden bg-gray-100 dark:bg-gray-700">
                 <img
-                  src={p.imagen || "https://via.placeholder.com/400x200"}
+                  src={
+                    validarImagen(p.imagen)
+                      ? p.imagen
+                      : "https://via.placeholder.com/400x200?text=Sin+Imagen"
+                  }
                   alt={p.titulo}
                   className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.target.src =
+                      "https://via.placeholder.com/400x200?text=Sin+Imagen";
+                  }}
                 />
               </div>
 
-              {/* Contenido */}
+              {/* 🔹 Contenido */}
               <div className="p-4 space-y-2">
-                <h3 className="font-bold text-lg text-gray-800">{p.titulo}</h3>
+                <h3 className="font-bold text-lg text-gray-800 dark:text-gray-100">
+                  {p.titulo}
+                </h3>
 
-                <p className="text-gray-600 text-sm line-clamp-3">
+                <p className="text-gray-600 dark:text-gray-300 text-sm line-clamp-3">
                   {p.descripcion}
                 </p>
 
-                {/* Chips */}
+                {/* Etiquetas */}
                 <div className="flex flex-wrap gap-2 mt-2">
                   {p.tipo && (
-                    <span className="text-xs bg-pink-100 text-pink-600 px-2 py-1 rounded-full">
+                    <span className="text-xs bg-pink-100 dark:bg-pink-700 text-pink-600 dark:text-white px-2 py-1 rounded-full">
                       {p.tipo}
                     </span>
                   )}
-
                   {p.nivel && (
-                    <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full">
+                    <span className="text-xs bg-blue-100 dark:bg-blue-700 text-blue-600 dark:text-white px-2 py-1 rounded-full">
                       {p.nivel}
                     </span>
                   )}
-
                   {p.duracion && (
-                    <span className="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full">
+                    <span className="text-xs bg-green-100 dark:bg-green-700 text-green-600 dark:text-white px-2 py-1 rounded-full">
                       {p.duracion}
+                    </span>
+                  )}
+                  {p.dieta && (
+                    <span className="text-xs bg-yellow-100 dark:bg-yellow-700 text-yellow-700 dark:text-white px-2 py-1 rounded-full">
+                      {p.dieta}
                     </span>
                   )}
                 </div>
