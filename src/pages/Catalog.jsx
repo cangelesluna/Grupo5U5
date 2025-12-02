@@ -3,7 +3,9 @@ import { auth, db } from "../lib/firebase";
 import { addPlanToUser } from "../pages/services/userPlans";
 import { AuthContext } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, doc, getDoc } from "firebase/firestore";
+import Modal from "../components/Modal";
+import CapibaraLoader from "../components/CapibaraLoader";
 
 const Catalogo = () => {
   const [planes, setPlanes] = useState([]);
@@ -14,6 +16,21 @@ const Catalogo = () => {
 
   const [busquedaComida, setBusquedaComida] = useState("");
   const [dietaFiltro, setDietaFiltro] = useState("todos");
+
+  const [modal, setModal] = useState({
+    visible: false,
+    mensaje: "",
+    tipo: "info",
+  });
+
+  const mostrarModal = (mensaje, tipo = "info") => {
+    setModal({ visible: true, mensaje, tipo });
+    setTimeout(() => {
+      setModal((prev) => ({ ...prev, visible: false }));
+    }, 2500);
+  };
+
+  const cerrarModal = () => setModal({ ...modal, visible: false });
 
   const { rol } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -31,22 +48,48 @@ const Catalogo = () => {
     cargarPlanes();
   }, []);
 
-  // ⭐ Guardar plan en el usuario
+  // ⭐ Guardar plan en el usuario con verificación de duplicados
   const seleccionarPlan = async (planId) => {
     const user = auth.currentUser;
 
     if (!user) {
-      alert("Debes iniciar sesión para seleccionar un plan.");
+      mostrarModal("Debes iniciar sesión para seleccionar un plan.", "warning");
       return;
     }
 
+    // 🔍 Revisar planes ya guardados
+    const userRef = doc(db, "users", user.uid);
+    const userSnap = await getDoc(userRef);
+
+    if (!userSnap.exists()) {
+      mostrarModal("Error: usuario no encontrado.", "error");
+      return;
+    }
+
+    const planesUsuario = userSnap.data().selectedPlans || [];
+
+    // 🚫 Si el plan ya fue seleccionado → alerta
+    if (planesUsuario.includes(planId)) {
+      mostrarModal(
+        "Este plan ya lo seleccionaste antes. Elige uno diferente.",
+        "warning"
+      );
+      return;
+    }
+
+    // ✅ Guardar plan
     await addPlanToUser(user.uid, planId);
-    alert("Plan agregado correctamente a tu perfil.");
+    mostrarModal("Plan agregado correctamente a tu perfil.", "success");
   };
 
-  if (loading) return <p>Cargando catálogo...</p>;
+  if (loading)
+    return (
+      <section className="min-h-screen bg-fuchsia-200 dark:bg-gray-900 pt-10 pb-40 flex items-center justify-center -mb-50">
+        <CapibaraLoader />
+      </section>
+    );
 
-  // =============== FILTROS ===============
+  // ================= FILTROS =================
   const entrenamientos = planes.filter((item) => item.tipo === "entrenamiento");
   const resultadosEntrenamiento = entrenamientos.filter((item) => {
     const coincideBusqueda = item.titulo
@@ -67,6 +110,14 @@ const Catalogo = () => {
 
   return (
     <section className="min-h-screen bg-fuchsia-200 dark:bg-gray-900 text-gray-800 dark:text-gray-100 px-6 pt-12 pb-70 -mb-40 transition-colors duration-500">
+      {/* 🔥 MODAL */}
+      <Modal
+        visible={modal.visible}
+        mensaje={modal.mensaje}
+        tipo={modal.tipo}
+        onClose={cerrarModal}
+      />
+
       <div className="max-w-6xl mx-auto">
         <h2 className="text-3xl font-bold text-center text-fuchsia-900 dark:text-fuchsia-700 mb-12">
           Catálogo de Planes
@@ -87,6 +138,7 @@ const Catalogo = () => {
               onChange={(e) => setBusquedaEntrenamiento(e.target.value)}
               className="w-full sm:w-1/2 border border-pink-800 dark:border-gray-600 rounded-lg px-4 py-2"
             />
+
             <select
               value={nivelFiltro}
               onChange={(e) => setNivelFiltro(e.target.value)}
@@ -117,6 +169,7 @@ const Catalogo = () => {
                     <h4 className="text-xl font-semibold text-fuchsia-800 dark:text-gray-300 mb-2">
                       {item.titulo}
                     </h4>
+
                     <p className="text-gray-700 dark:text-gray-200 mb-3">
                       {item.descripcion}
                     </p>
@@ -162,6 +215,7 @@ const Catalogo = () => {
               onChange={(e) => setBusquedaComida(e.target.value)}
               className="w-full sm:w-1/2 border border-pink-900 dark:border-gray-600 rounded-lg px-4 py-2"
             />
+
             <select
               value={dietaFiltro}
               onChange={(e) => setDietaFiltro(e.target.value)}
@@ -193,6 +247,7 @@ const Catalogo = () => {
                     <h4 className="text-xl font-semibold text-pink-800 dark:text-gray-300 mb-2">
                       {item.titulo}
                     </h4>
+
                     <p className="text-gray-700 dark:text-gray-200 mb-3">
                       {item.descripcion}
                     </p>

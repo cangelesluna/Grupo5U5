@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { doc, getDoc, updateDoc, setDoc, collection } from "firebase/firestore";
 import { db } from "../lib/firebase";
+import Modal from "../components/Modal";
 
 export default function EditarPlan() {
   const { id } = useParams();
@@ -14,10 +15,15 @@ export default function EditarPlan() {
     descripcion: "",
     tipo: "",
     nivel: "",
-    dieta: "", // ⭐ AGREGADO
+    dieta: "",
     duracion: "",
     imagen: "",
   });
+
+  // Estado del modal
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalMensaje, setModalMensaje] = useState("");
+  const [modalTipo, setModalTipo] = useState("success");
 
   const esEdicion = Boolean(id);
 
@@ -45,7 +51,7 @@ export default function EditarPlan() {
   }, [id, esEdicion]);
 
   // ========================================================
-  // 🔹 Subir imagen a Cloudinary (NO Firebase Storage)
+  // 🔹 Subir imagen a Cloudinary
   // ========================================================
   const uploadImageCloudinary = async (file) => {
     const data = new FormData();
@@ -62,9 +68,6 @@ export default function EditarPlan() {
     return json.secure_url;
   };
 
-  // ========================================================
-  // 🔹 Manejar cambio de archivo → subir a Cloudinary
-  // ========================================================
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -75,27 +78,51 @@ export default function EditarPlan() {
   };
 
   // ========================================================
-  // 🔹 Guardar plan en Firestore
+  // 🔹 Guardar plan en Firestore + mostrar modal
   // ========================================================
   async function guardarCambios(e) {
     e.preventDefault();
 
-    if (esEdicion) {
-      await updateDoc(doc(db, "plans", id), plan);
-      alert("Plan actualizado correctamente");
-    } else {
-      const ref = doc(collection(db, "plans"));
-      await setDoc(ref, plan);
-      alert("Plan agregado correctamente");
-    }
+    try {
+      if (esEdicion) {
+        await updateDoc(doc(db, "plans", id), plan);
 
-    navigate("/admin/planes");
+        setModalTipo("success");
+        setModalMensaje("✔️ Plan actualizado correctamente");
+        setModalVisible(true);
+      } else {
+        const ref = doc(collection(db, "plans"));
+        await setDoc(ref, plan);
+
+        setModalTipo("success");
+        setModalMensaje("✔️ Plan agregado correctamente");
+        setModalVisible(true);
+      }
+    } catch (error) {
+      setModalTipo("error");
+      setModalMensaje("❌ Error al guardar el plan");
+      setModalVisible(true);
+    }
   }
+
+  // Cuando cierre el modal → redirigir
+  const cerrarModal = () => {
+    setModalVisible(false);
+    navigate("/admin/planes");
+  };
 
   if (loading) return <p>Cargando...</p>;
 
   return (
     <div>
+      {/* Modal */}
+      <Modal
+        visible={modalVisible}
+        mensaje={modalMensaje}
+        tipo={modalTipo}
+        onClose={cerrarModal}
+      />
+
       <h1 className="text-xl font-bold mb-4">
         {esEdicion ? "Editar plan" : "Crear plan"}
       </h1>
@@ -129,7 +156,6 @@ export default function EditarPlan() {
           onChange={(e) => setPlan({ ...plan, nivel: e.target.value })}
         />
 
-        {/* ⭐ NUEVO CAMPO DIETA */}
         <input
           className="border p-2 w-full"
           placeholder="Dieta (solo si es un plan de comida)"
@@ -144,7 +170,7 @@ export default function EditarPlan() {
           onChange={(e) => setPlan({ ...plan, duracion: e.target.value })}
         />
 
-        {/* ⭐ Subir imagen a Cloudinary */}
+        {/* Imagen */}
         <div>
           <label className="block mb-1 font-semibold">Imagen</label>
           <input
@@ -155,7 +181,6 @@ export default function EditarPlan() {
           />
         </div>
 
-        {/* Mostrar la URL */}
         <input
           className="border p-2 w-full"
           placeholder="URL de imagen"
@@ -163,7 +188,6 @@ export default function EditarPlan() {
           onChange={(e) => setPlan({ ...plan, imagen: e.target.value })}
         />
 
-        {/* Preview de imagen */}
         {plan.imagen && (
           <img
             src={plan.imagen}

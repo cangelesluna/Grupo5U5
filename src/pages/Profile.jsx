@@ -1,18 +1,37 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { auth, db } from "../lib/firebase";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, collection, getDocs } from "firebase/firestore";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 
 import { getUserPlans } from "./services/userPlans";
-import catalogo from "../data/catalogo.json";
 
 function Profile() {
   const [userData, setUserData] = useState(null);
-  const [planes, setPlanes] = useState([]);
+  const [planesInfo, setPlanesInfo] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  // 🔥 Obtener info de los planes desde Firestore
+  const fetchPlansInfo = async (ids) => {
+    if (!ids || ids.length === 0) {
+      setPlanesInfo([]);
+      return;
+    }
+
+    const plansRef = collection(db, "plans");
+    const snap = await getDocs(plansRef);
+
+    const allPlans = snap.docs.map((d) => ({
+      id: d.id,
+      ...d.data(),
+    }));
+
+    const filtered = allPlans.filter((p) => ids.includes(p.id));
+    setPlanesInfo(filtered);
+  };
+
+  // 🔥 Cargar datos del usuario
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (!currentUser) {
@@ -21,24 +40,29 @@ function Profile() {
       }
 
       try {
-        const docRef = doc(db, "users", currentUser.uid);
-        const docSnap = await getDoc(docRef);
-        if (!docSnap.exists()) {
+        const userRef = doc(db, "users", currentUser.uid);
+        const userSnap = await getDoc(userRef);
+
+        if (!userSnap.exists()) {
           setUserData(null);
           setLoading(false);
           return;
         }
 
-        const data = docSnap.data();
+        const data = userSnap.data();
         setUserData(data);
 
+        // Redirigir admins
         if (data.rol === "admin") {
           navigate("/admin/dashboard");
           return;
         }
 
+        // ⚡ Obtener IDs de planes del usuario
         const misPlanesIds = await getUserPlans(currentUser.uid);
-        setPlanes(misPlanesIds || []);
+
+        // ⚡ Obtener info de cada plan desde Firestore
+        await fetchPlansInfo(misPlanesIds);
       } catch (error) {
         console.error("Error cargando perfil:", error);
       } finally {
@@ -54,21 +78,18 @@ function Profile() {
     navigate("/login");
   };
 
-  const planesInfo = planes
-    .map((id) => catalogo.find((p) => p.id === id))
-    .filter(Boolean);
-
-  if (loading)
+  if (loading) {
     return (
       <div className="p-10 text-center text-gray-700 dark:text-gray-300">
         Cargando perfil...
       </div>
     );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-8 transition-colors">
       <div className="max-w-4xl mx-auto space-y-6">
-        {/* Datos del usuario */}
+        {/* Usuario */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6 transition">
           <div className="flex justify-between items-center mb-4">
             <h1 className="text-3xl font-bold text-gray-800 dark:text-white">
@@ -77,7 +98,9 @@ function Profile() {
 
             <button
               onClick={handleLogout}
-              className="px-4 py-2 bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-300 rounded hover:bg-red-200 dark:hover:bg-red-900 transition text-sm font-semibold"
+              className="px-4 py-2 bg-red-100 dark:bg-red-900/40 
+              text-red-600 dark:text-red-300 rounded hover:bg-red-200 
+              dark:hover:bg-red-900 transition text-sm font-semibold"
             >
               Cerrar Sesión
             </button>
@@ -117,7 +140,7 @@ function Profile() {
           )}
         </div>
 
-        {/* Planes del usuario */}
+        {/* Planes */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6 transition">
           <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white border-b pb-2 border-gray-200 dark:border-gray-700">
             Mis Planes Contratados
@@ -140,12 +163,22 @@ function Profile() {
                   key={plan.id}
                   className="p-4 border border-gray-200 dark:border-gray-700 rounded-xl hover:shadow-md transition bg-white dark:bg-gray-800"
                 >
+                  {plan.imagen && (
+                    <img
+                      src={plan.imagen}
+                      alt={plan.titulo}
+                      className="w-full h-40 object-cover rounded-lg mb-3"
+                    />
+                  )}
+
                   <h3 className="font-bold text-lg text-pink-600 dark:text-pink-400">
                     {plan.titulo}
                   </h3>
+
                   <p className="text-gray-600 dark:text-gray-300 text-sm mt-1">
                     {plan.descripcion}
                   </p>
+
                   <div className="mt-3 inline-block px-2 py-1 bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300 text-xs rounded-full font-semibold capitalize">
                     {plan.tipo}
                   </div>

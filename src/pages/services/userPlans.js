@@ -6,7 +6,7 @@ export async function addPlanToUser(uid, planId) {
   const userRef = doc(db, "users", uid);
 
   await updateDoc(userRef, {
-    planesSeleccionados: arrayUnion(planId),
+    selectedPlans: arrayUnion(planId),
   });
 }
 
@@ -18,5 +18,5 @@ export async function getUserPlans(uid) {
   if (!snap.exists()) return [];
 
   const data = snap.data();
-  return data.planesSeleccionados || [];
+  return data.selectedPlans || [];
 }
