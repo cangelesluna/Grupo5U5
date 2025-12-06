@@ -45,6 +45,7 @@ function Header({ isDark, setIsDark }) {
             "/inscripcion",
             "/catalogo",
             "/contact",
+            "/promociones",
           ].map((path, i) => {
             const labels = [
               "Inicio",
@@ -53,6 +54,7 @@ function Header({ isDark, setIsDark }) {
               "Inscripción",
               "Catálogo",
               "Contacto",
+              "Promociones",
             ];
             return (
               <NavLink
@@ -149,6 +151,7 @@ function Header({ isDark, setIsDark }) {
             "/inscripcion",
             "/catalogo",
             "/contact",
+            "/promociones",
           ].map((path, i) => {
             const labels = [
               "Inicio",
@@ -157,6 +160,7 @@ function Header({ isDark, setIsDark }) {
               "Inscripción",
               "Catálogo",
               "Contacto",
+              "Promociones",
             ];
             return (
               <NavLink

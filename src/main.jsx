@@ -13,6 +13,7 @@ import Contact from "./pages/Contact";
 import MisionVision from "./pages/MisionVision";
 import Inscripcion from "./pages/Inscripcion";
 import Catalog from "./pages/Catalog";
+import LaunchCampaign from "./pages/LaunchCampaign";
 import Profile from "./pages/Profile";
 import Login from "./pages/Login";
 
@@ -41,6 +42,7 @@ const router = createBrowserRouter([
       { path: "/catalogo", element: <Catalog /> }, // Catálogo normal
       { path: "/login", element: <Login /> },
       { path: "/perfil", element: <Profile /> },
+      { path: "/promociones", element: <LaunchCampaign /> },
 
       // Rutas de cliente
       { path: "/cliente", element: <ClienteHome /> },
