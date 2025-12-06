@@ -5,10 +5,10 @@ import { AuthContext } from "../context/AuthContext";
 const AdminRoute = ({ children }) => {
   const { usuario, cliente, loading } = useContext(AuthContext);
 
-  // Mientras se cargan los datos, no mostramos nada
-  if (loading) return null;
+  // Si está cargando usuario o cliente, no renderizar ni redirigir
+  if (loading || (usuario && !cliente)) return null;
 
-  // Si no hay usuario o el rol no es admin, redirigimos
+  // Si ya cargó todo y el usuario no es admin → redirigir
   if (!usuario || cliente?.rol !== "admin") {
     return <Navigate to="/login" replace />;
   }

@@ -1,41 +1,10 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { FaFacebookF, FaInstagram, FaTwitter, FaYoutube } from "react-icons/fa";
-import capibara from "../assets/capibara.png";
-import capibara2 from "../assets/capibara2.png";
-import capibara3 from "../assets/capibara3.png";
 
 function Footer() {
   return (
     <div className="relative mt-32">
-      {/* 🦫 Capibara visible solo en pantallas pequeñas */}
-      <div className="absolute left-1/2 -translate-x-1/2 -top-40 z-20 flex justify-center md:hidden -translate-y-12">
-        <img
-          src={capibara}
-          alt="Capibara móvil"
-          className="w-50 drop-shadow-xl transition-transform duration-500 hover:scale-105"
-        />
-      </div>
-
-      {/* 🦫 Grupo de capibaras (solo en pantallas medianas o mayores) */}
-      <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 md:-top-44 lg:-top-56 z-20 items-center justify-center space-x-20 lg:space-x-32">
-        <img
-          src={capibara2}
-          alt="Capibara izquierda"
-          className="w-40 lg:w-48 -translate-y-6 drop-shadow-xl transition-transform duration-500 hover:scale-105"
-        />
-        <img
-          src={capibara}
-          alt="Capibara centro"
-          className="w-48 lg:w-56 drop-shadow-xl transition-transform duration-500 hover:scale-105 -translate-y-6 lg:-translate-y-3"
-        />
-        <img
-          src={capibara3}
-          alt="Capibara derecha"
-          className="w-40 lg:w-48 -translate-y-10 drop-shadow-xl transition-transform duration-500 hover:scale-105"
-        />
-      </div>
-
       {/* 🌈 Footer principal */}
       <footer className="relative z-10 bg-gradient-to-r from-pink-400 to-pink-500 dark:from-gray-800 dark:via-gray-900 dark:to-black text-white pt-20 pb-7 transition-colors duration-500 shadow-inner rounded-t-3xl">
         <div className="max-w-6xl mx-auto px-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
