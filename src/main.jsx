@@ -17,12 +17,17 @@ import LaunchCampaign from "./pages/LaunchCampaign";
 import Profile from "./pages/Profile";
 import Login from "./pages/Login";
 
+
 // Rutas de cliente y admin
 import ClienteHome from "./components/ProtectedRoute";
 import AdminRoute from "./pages/AdminRoute";
 import Dashboard from "./pages/Dashboard";
 import PlanList from "./pages/PlanList";
 import PlanEditor from "./pages/PlanEditor";
+import Monitoreo from "./pages/Monitoreo";
+import Equipo from "./pages/Equipo";
+import Ajustes from "./pages/Ajustes";
+import Comunidad from "./pages/Comunidad";
 
 import "./index.css";
 
@@ -43,6 +48,7 @@ const router = createBrowserRouter([
       { path: "/login", element: <Login /> },
       { path: "/perfil", element: <Profile /> },
       { path: "/promociones", element: <LaunchCampaign /> },
+       
 
       // Rutas de cliente
       { path: "/cliente", element: <ClienteHome /> },
@@ -62,6 +68,10 @@ const router = createBrowserRouter([
       { path: "planes", element: <PlanList /> },
       { path: "crear-plan", element: <PlanEditor /> },
       { path: "editar-plan/:id", element: <PlanEditor /> },
+          { path: "monitoreo", element: <Monitoreo /> },
+  { path: "equipo", element: <Equipo /> },
+  {path: "ajustes", element: <Ajustes /> },
+  {path: "comunidad", element: <Comunidad /> },
       // Aquí puedes agregar más secciones del admin
     ],
   },
