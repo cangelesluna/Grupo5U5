@@ -18,12 +18,12 @@ export default function Comunidad() {
     setPosts(updated);
   };
 
-  // 🔹 Manejar selección de archivos
+  // 🔹 Manejar archivos
   const handleFileChange = (e) => {
     setFiles(Array.from(e.target.files));
   };
 
-  // 🔹 Crear nueva publicación
+  // 🔹 Publicar
   const publish = () => {
     if (!announcement.trim() && files.length === 0) {
       alert("Escribe un anuncio o adjunta un archivo.");
@@ -44,10 +44,15 @@ export default function Comunidad() {
     const updated = [newPost, ...posts];
     savePosts(updated);
 
-    // limpiar
     setAnnouncement("");
     setFiles([]);
     document.getElementById("fileInput").value = "";
+  };
+
+  // 🔹 ELIMINAR PUBLICACIÓN
+  const deletePost = (id) => {
+    const updated = posts.filter((post) => post.id !== id);
+    savePosts(updated);
   };
 
   return (
@@ -69,7 +74,6 @@ export default function Comunidad() {
           onChange={(e) => setAnnouncement(e.target.value)}
         />
 
-        {/* Cuadrícula de archivos */}
         <div className="mb-4">
           <label className="block font-semibold mb-2">Seleccionar archivos</label>
 
@@ -82,6 +86,7 @@ export default function Comunidad() {
             className="block w-full text-sm text-gray-700 dark:text-gray-300"
           />
 
+          {/* Previsualización */}
           {files.length > 0 && (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
               {files.map((file, idx) => (
@@ -117,7 +122,7 @@ export default function Comunidad() {
         </button>
       </div>
 
-      {/* PUBLICACIONES RECIENTES */}
+      {/* PUBLICACIONES */}
       <div className="bg-white dark:bg-gray-900 border dark:border-gray-700 p-6 rounded-lg shadow">
         <h3 className="text-xl font-semibold mb-4">Publicaciones recientes</h3>
 
@@ -134,7 +139,7 @@ export default function Comunidad() {
 
               {/* Media */}
               {post.media.length > 0 && (
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-3">
                   {post.media.map((m, index) => (
                     <div
                       key={index}
@@ -149,6 +154,14 @@ export default function Comunidad() {
                   ))}
                 </div>
               )}
+
+              {/*  BOTÓN ELIMINAR */}
+              <button
+                onClick={() => deletePost(post.id)}
+                className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded"
+              >
+                Eliminar
+              </button>
             </div>
           ))
         )}
