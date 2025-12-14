@@ -1,86 +1,279 @@
-import React from "react";
+import React, { useEffect, useState, useRef } from "react";
+import PROMO1 from "../assets/PROMO1.mp4";
+import PROMO2 from "../assets/PROMO2.mp4";
+import PROMO3 from "../assets/PROMO3.mp4";
 import promo from "../assets/promo.jpg";
+import promo3 from "../assets/promo3.png";
+import promo7 from "../assets/promo7.mp4";
+import video1 from "../assets/video1.mp4";
+import video2 from "../assets/video2.mp4";
+import PROMOCIONAL2 from "../assets/PROMOCIONAL2.png";
 
-const LaunchCampaign = ({
-  businessName = "FitLife",
-  onExplore = () => window.scrollTo({ top: 0, behavior: "smooth" }),
-  onContact = () => (window.location.href = "/contact"),
-}) => {
-  const socialPost = `¿Lista para transformar tu bienestar? En FitLife reunimos planes de alimentación simples, entrenamientos que realmente se ajustan a tu ritmo y hábitos que sí puedes sostener. No buscamos “vidas perfectas”: buscamos cambios reales. Más energía, mejor relación con tu comida y un cuerpo que se siente fuerte día a día. Este es el inicio de tu mejor versión. 💪🥗✨`;
+// =======================================================
+// VIDEO CARD (ESTILO iTUNES)
+// =======================================================
+const PromoVideo = ({ src, title, text, active }) => {
+  const videoRef = useRef(null);
+
+  useEffect(() => {
+    if (!videoRef.current) return;
+
+    if (active) {
+      videoRef.current.play();
+    } else {
+      videoRef.current.pause();
+      videoRef.current.currentTime = 0;
+    }
+  }, [active]);
 
   return (
-    <section
-      className="relative w-full bg-gradient-to-br from-pink-100 via-fuchsia-100 to-purple-100
-      dark:from-gray-900 dark:via-gray-800 dark:to-gray-900
-      overflow-hidden rounded-3xl shadow-xl border border-white/40 dark:border-gray-700 min-h-[70vh]
-      py-0"
+    <div
+      className={`transition-all duration-500 ease-out flex-shrink-0
+        ${active ? "scale-100 opacity-100" : "scale-90 opacity-60 blur-[1px]"}
+      `}
     >
-      {/* IMAGE FOR MOBILE – FULL WIDTH TOP */}
-      <div className="block md:hidden w-full h-80">
-        <img
-          src={promo}
-          alt="FitLife Banner"
-          className="w-full h-full object-cover object-center"
+      <div className="relative w-[260px] sm:w-[320px] md:w-[360px]">
+        <video
+          ref={videoRef}
+          src={src}
+          muted
+          loop
+          playsInline
+          className="w-full aspect-[4/5] object-cover rounded-3xl shadow-2xl"
         />
+
+        <div className="absolute bottom-3 left-3 right-3 bg-black/50 dark:bg-zinc-900/70 backdrop-blur-md text-white p-3 rounded-2xl">
+          <h3 className="text-lg font-semibold">{title}</h3>
+          <p className="text-sm opacity-90">{text}</p>
+        </div>
       </div>
+    </div>
+  );
+};
 
-      {/* DESKTOP GRID */}
-      <div className="grid md:grid-cols-2 h-auto items-center">
-        {/* LEFT — CONTENT */}
-        <div className="flex flex-col justify-center px-8 md:px-16 py-12">
-          <h1 className="text-4xl md:text-6xl font-extrabold text-fuchsia-900 dark:text-fuchsia-300 leading-tight">
-            Bienvenida al lanzamiento de{" "}
-            <span className="text-fuchsia-700 dark:text-fuchsia-400">
-              {businessName}
+// =======================================================
+// LANZAMIENTO FITLIFE
+// =======================================================
+const LaunchCampaign = () => {
+  const [showPromo, setShowPromo] = useState(true);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const containerRef = useRef(null);
+
+  const videos = [
+    {
+      src: video1,
+      title: "Entrenamiento guiado",
+      text: "Videos claros y fáciles de seguir.",
+    },
+    {
+      src: PROMO1,
+      title: "Rutinas accesibles",
+      text: "Entrena desde casa, sin equipos.",
+    },
+    {
+      src: PROMO2,
+      title: "Hábitos saludables",
+      text: "Pequeños cambios que sí se mantienen.",
+    },
+    {
+      src: PROMO3,
+      title: "Bienestar constante",
+      text: "Motivación diaria para tu estilo de vida.",
+    },
+    {
+      src: video2,
+      title: "Progreso real",
+      text: "Avanza a tu ritmo, sin presión.",
+    },
+  ];
+  const infiniteVideos = [...videos, ...videos, ...videos];
+
+  useEffect(() => {
+    setShowPromo(true);
+
+    // Posicionar el scroll al centro
+    requestAnimationFrame(() => {
+      if (containerRef.current) {
+        const cardWidth = 360 + 40;
+        containerRef.current.scrollLeft = videos.length * cardWidth;
+        setActiveIndex(videos.length);
+      }
+    });
+  }, []);
+
+  const handleScroll = () => {
+    if (!containerRef.current) return;
+    const scrollX = containerRef.current.scrollLeft;
+    const cardWidth = 360 + 40;
+    const index = Math.round(scrollX / cardWidth);
+    setActiveIndex(index);
+
+    const total = videos.length * cardWidth;
+    const maxScroll = total * 2;
+
+    // 🌀 REPOSICIÓN INVISIBLE
+    if (scrollX <= cardWidth) {
+      containerRef.current.scrollLeft = scrollX + total;
+    }
+
+    if (scrollX >= maxScroll) {
+      containerRef.current.scrollLeft = scrollX - total;
+    }
+  };
+
+  return (
+    <>
+      {/* POPUP PROMOCIONAL */}
+      {showPromo && (
+        <div className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center z-[999]">
+          <div className="relative bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl w-[90%] max-w-[420px] overflow-hidden">
+            <button
+              onClick={() => setShowPromo(false)}
+              className="absolute top-3 right-3 bg-fuchsia-600 text-white w-9 h-9 rounded-full text-lg flex items-center justify-center"
+            >
+              ✕
+            </button>
+
+            <img
+              src={PROMOCIONAL2}
+              alt="Lanzamiento FitLife"
+              className="w-full cursor-pointer"
+              onClick={() =>
+                document
+                  .getElementById("promociones")
+                  .scrollIntoView({ behavior: "smooth" })
+              }
+            />
+
+            <p className="text-center py-4 text-lg font-bold text-fuchsia-800 dark:text-fuchsia-400">
+              🎉 Lanzamiento oficial FitLife
+            </p>
+          </div>
+        </div>
+      )}
+      {/* HERO */}
+      <section className="relative w-full bg-gradient-to-br from-pink-200 via-fuchsia-200 to-purple-200 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 overflow-hidden">
+        <div className="grid md:grid-cols-2 min-h-[720px]">
+          {/* TEXTO */}
+          <div className="px-6 py-12 md:px-14 md:py-16 flex flex-col justify-center">
+            <span className="inline-block mb-4 px-4 py-1 text-xs font-semibold text-white bg-fuchsia-600 rounded-full">
+              NUEVO · LANZAMIENTO
             </span>
-          </h1>
 
-          <p className="mt-6 text-gray-700 dark:text-gray-300 text-lg md:text-xl leading-relaxed max-w-xl">
-            FitLife transforma lo saludable en algo simple: recetas rápidas,
-            entrenamientos accesibles y hábitos que realmente encajan en tu
-            vida. Nada extremo, solo bienestar sostenible.
-          </p>
+            <h1 className="text-3xl sm:text-4xl md:text-6xl font-extrabold text-fuchsia-900 dark:text-fuchsia-400">
+              🚀 FitLife ya está aquí
+            </h1>
 
-          {/* CTAs */}
-          <div className="mt-8 flex flex-col sm:flex-row gap-4">
-            <button
-              onClick={onExplore}
-              className="px-8 py-3 bg-gradient-to-r from-pink-600 to-fuchsia-600
-              hover:from-pink-700 hover:to-fuchsia-700 text-white rounded-xl
-              font-semibold shadow-md transition-all"
-            >
-              Descubrir FitLife
-            </button>
+            <p className="mt-4 text-lg font-medium text-fuchsia-900 dark:text-zinc-300 max-w-xl">
+              Bienestar real para personas reales. Sin dietas extremas, sin
+              rutinas imposibles y sin presión.
+            </p>
 
-            <button
-              onClick={onContact}
-              className="px-8 py-3 border border-fuchsia-600 text-fuchsia-700
-              dark:text-fuchsia-300 rounded-xl bg-white/70 dark:bg-transparent 
-              font-medium shadow-md hover:bg-white/90 transition-all"
-            >
-              Hablar con nosotros
-            </button>
+            <div className="mt-6 bg-white/70 dark:bg-gray-800/70 backdrop-blur-md p-5 rounded-2xl text-sm text-gray-800 dark:text-zinc-300 max-w-xl shadow-sm leading-relaxed">
+              <p className="font-semibold text-fuchsia-800 dark:text-fuchsia-400 mb-2">
+                Empieza a cuidarte sin cambiar tu vida por completo.
+              </p>
+
+              <p className="mb-3">
+                FitLife está diseñado para quienes quieren verse y sentirse
+                mejor, pero no tienen tiempo, experiencia previa o motivación
+                constante.
+              </p>
+
+              <p className="mb-3">
+                Aquí no se trata de hacerlo perfecto, sino de hacerlo posible:
+                entrenamientos simples, hábitos sostenibles y bienestar que se
+                mantiene en el tiempo.
+              </p>
+
+              <p className="font-medium text-fuchsia-700 dark:text-fuchsia-300">
+                Empieza hoy desde casa y nota el cambio paso a paso.
+              </p>
+            </div>
+
+            <div className="mt-5 flex flex-wrap gap-2 max-w-xl">
+              <span className="px-3 py-1 bg-white/80 dark:bg-gray-800 rounded-full text-xs font-medium text-fuchsia-700 dark:text-fuchsia-300 shadow">
+                🏠 Entrena en casa
+              </span>
+              <span className="px-3 py-1 bg-white/80 dark:bg-gray-800 rounded-full text-xs font-medium text-fuchsia-700 dark:text-fuchsia-300 shadow">
+                ⏱️ Rutinas cortas
+              </span>
+              <span className="px-3 py-1 bg-white/80 dark:bg-gray-800 rounded-full text-xs font-medium text-fuchsia-700 dark:text-fuchsia-300 shadow">
+                🧠 Hábitos sostenibles
+              </span>
+              <span className="px-3 py-1 bg-white/80 dark:bg-gray-800 rounded-full text-xs font-medium text-fuchsia-700 dark:text-fuchsia-300 shadow">
+                🚫 Sin extremos
+              </span>
+            </div>
+
+            <div className="mt-8 flex flex-col sm:flex-row gap-4">
+              <a
+                href="#promociones"
+                className="px-6 py-3 bg-gradient-to-r from-pink-600 to-fuchsia-600 text-white rounded-xl font-bold shadow-xl hover:scale-105 transition text-center"
+              >
+                Empezar ahora
+              </a>
+
+              <a
+                href="/contact"
+                className="px-6 py-3 border border-fuchsia-600 dark:border-fuchsia-400 text-fuchsia-700 dark:text-fuchsia-300 rounded-xl bg-white/80 dark:bg-gray-800 text-center"
+              >
+                Contactar
+              </a>
+            </div>
           </div>
 
-          {/* SOCIAL POST */}
-          <p
-            className="mt-8 bg-white/50 dark:bg-gray-800/50 backdrop-blur-md 
-            p-4 rounded-xl text-sm text-gray-700 dark:text-gray-300 max-w-lg"
-          >
-            {socialPost}
-          </p>
+          {/* VIDEO DERECHA */}
+          <div className="hidden md:block relative">
+            <video
+              src={promo7}
+              autoPlay
+              muted
+              loop
+              playsInline
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-black/40 dark:block hidden" />
+          </div>
         </div>
+      </section>
 
-        {/* RIGHT — IMAGE REDUCED, CENTERED, PROFESSIONAL */}
-        <div className="hidden md:flex items-center justify-center py-10">
-          <img
-            src={promo}
-            alt="FitLife Hero"
-            className="max-h-[1020px] w-auto object-contain rounded-2xl shadow-lg"
-          />
+      {/* CARRUSEL iTUNES */}
+      <section
+        id="promociones"
+        className="w-full bg-fuchsia-200  dark:bg-gray-900 py-24 -mb-40 pb-40"
+      >
+        <h2
+          className="
+  text-center 
+  text-4xl sm:text-5xl 
+  font-extrabold 
+  text-transparent bg-clip-text 
+  bg-gradient-to-r from-fuchsia-700 via-pink-600 to-purple-600
+  dark:from-fuchsia-400 dark:via-pink-400 dark:to-purple-400
+  mb-14
+  tracking-tight
+  drop-shadow-sm
+"
+        >
+          Descubre FitLife en acción
+        </h2>
+
+        <div
+          ref={containerRef}
+          onScroll={handleScroll}
+          className="
+            flex gap-10 px-[calc(45vw-180px)]
+            overflow-x-auto scroll-smooth no-scrollbar
+            snap-x snap-mandatory
+          "
+        >
+          {infiniteVideos.map((video, index) => (
+            <PromoVideo key={index} {...video} active={index === activeIndex} />
+          ))}
         </div>
-      </div>
-    </section>
+      </section>
+    </>
   );
 };
 
