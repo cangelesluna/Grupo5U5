@@ -1,4 +1,3 @@
-
 // src/pages/Monitoreo.jsx
 import React, { useEffect, useState } from "react";
 import { listenMonitoreo, addMonitoreo, deleteMonitoreo } from "../lib/service";
@@ -10,10 +9,6 @@ export default function Monitoreo() {
   const [usuario, setUsuario] = useState("");
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
-
-  //  NUEVO: Dark mode
-  const [isDark, setIsDark] = useState(false);
-  const toggleDark = () => setIsDark(!isDark);
 
   useEffect(() => {
     setLoading(true);
@@ -38,7 +33,10 @@ export default function Monitoreo() {
     }
 
     try {
-      await addMonitoreo({ actividad: actividad.trim(), usuario: usuario.trim() });
+      await addMonitoreo({
+        actividad: actividad.trim(),
+        usuario: usuario.trim(),
+      });
       setActividad("");
       setUsuario("");
     } catch (err) {
@@ -72,88 +70,76 @@ export default function Monitoreo() {
   };
 
   return (
-    <div className={isDark ? "dark" : ""}>
-      <div className="p-6 min-h-screen bg-gray-100 dark:bg-gray-900 dark:text-white transition">
+    <div className="p-6 min-h-screen bg-gray-100 dark:bg-gray-900 dark:text-white transition">
+      <h1 className="text-2xl font-bold mb-4">Dashboard de Monitoreo</h1>
 
-        {/*  Botón de modo oscuro */}
-        <button
-          onClick={toggleDark}
-          className="mb-4 px-4 py-2 rounded bg-black text-white dark:bg-white dark:text-black transition"
-        >
-          {isDark ? "Modo Claro ☀️" : "Modo Oscuro 🌙"}
-        </button>
+      <div className="bg-white dark:bg-gray-800 p-4 rounded shadow mb-6 transition">
+        <h2 className="text-lg font-semibold mb-3">Agregar Actividad</h2>
 
-        <h1 className="text-2xl font-bold mb-4">Dashboard de Monitoreo</h1>
-
-        <div className="bg-white dark:bg-gray-800 p-4 rounded shadow mb-6 transition">
-          <h2 className="text-lg font-semibold mb-3">Agregar Actividad</h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <input
-              className="border p-2 rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-              placeholder="Actividad"
-              value={actividad}
-              onChange={(e) => setActividad(e.target.value)}
-            />
-            <input
-              className="border p-2 rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-              placeholder="Usuario"
-              value={usuario}
-              onChange={(e) => setUsuario(e.target.value)}
-            />
-            <button
-              onClick={handleAgregar}
-              className="bg-blue-600 text-white px-4 py-2 rounded"
-            >
-              Agregar
-            </button>
-          </div>
-
-          {errorMsg && <p className="text-red-400 mt-2">{errorMsg}</p>}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <input
+            className="border p-2 rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+            placeholder="Actividad"
+            value={actividad}
+            onChange={(e) => setActividad(e.target.value)}
+          />
+          <input
+            className="border p-2 rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+            placeholder="Usuario"
+            value={usuario}
+            onChange={(e) => setUsuario(e.target.value)}
+          />
+          <button
+            onClick={handleAgregar}
+            className="bg-blue-600 text-white px-4 py-2 rounded"
+          >
+            Agregar
+          </button>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 p-4 rounded shadow transition">
-          <h2 className="text-lg font-semibold mb-3">Historial</h2>
+        {errorMsg && <p className="text-red-400 mt-2">{errorMsg}</p>}
+      </div>
 
-          {loading ? (
-            <p className="p-4">Cargando...</p>
-          ) : actividades.length === 0 ? (
-            <p className="p-4 text-gray-500 dark:text-gray-300">
-              No hay actividades registradas.
-            </p>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="border-b dark:border-gray-700">
-                    <th className="p-2">Actividad</th>
-                    <th className="p-2">Usuario</th>
-                    <th className="p-2">Fecha</th>
-                    <th className="p-2">Acciones</th>
+      <div className="bg-white dark:bg-gray-800 p-4 rounded shadow transition">
+        <h2 className="text-lg font-semibold mb-3">Historial</h2>
+
+        {loading ? (
+          <p className="p-4">Cargando...</p>
+        ) : actividades.length === 0 ? (
+          <p className="p-4 text-gray-500 dark:text-gray-300">
+            No hay actividades registradas.
+          </p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b dark:border-gray-700">
+                  <th className="p-2">Actividad</th>
+                  <th className="p-2">Usuario</th>
+                  <th className="p-2">Fecha</th>
+                  <th className="p-2">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {actividades.map((item) => (
+                  <tr key={item.id} className="border-b dark:border-gray-700">
+                    <td className="p-2">{item.actividad}</td>
+                    <td className="p-2">{item.usuario}</td>
+                    <td className="p-2">{formatFecha(item.fecha)}</td>
+                    <td className="p-2">
+                      <button
+                        onClick={() => handleEliminar(item.id)}
+                        className="bg-red-600 text-white px-3 py-1 rounded"
+                      >
+                        Eliminar
+                      </button>
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {actividades.map((item) => (
-                    <tr key={item.id} className="border-b dark:border-gray-700">
-                      <td className="p-2">{item.actividad}</td>
-                      <td className="p-2">{item.usuario}</td>
-                      <td className="p-2">{formatFecha(item.fecha)}</td>
-                      <td className="p-2">
-                        <button
-                          onClick={() => handleEliminar(item.id)}
-                          className="bg-red-600 text-white px-3 py-1 rounded"
-                        >
-                          Eliminar
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );

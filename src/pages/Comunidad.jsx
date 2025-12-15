@@ -1,58 +1,81 @@
-
 import { useState, useEffect } from "react";
+import { db } from "../lib/firebase";
+import {
+  collection,
+  addDoc,
+  getDocs,
+  deleteDoc,
+  doc,
+  query,
+  orderBy,
+  serverTimestamp,
+} from "firebase/firestore";
 
 export default function Comunidad() {
   const [announcement, setAnnouncement] = useState("");
   const [files, setFiles] = useState([]);
   const [posts, setPosts] = useState([]);
 
-  // 🔹 Cargar historial desde localStorage
-  useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem("fitlife-community")) || [];
-    setPosts(saved);
-  }, []);
+  // 🔹 Cargar publicaciones desde Firestore
+  const fetchPosts = async () => {
+    try {
+      const q = query(collection(db, "post"), orderBy("createdAt", "desc"));
 
-  // 🔹 Guardar historial
-  const savePosts = (updated) => {
-    localStorage.setItem("fitlife-community", JSON.stringify(updated));
-    setPosts(updated);
+      const snap = await getDocs(q);
+      const data = snap.docs.map((d) => ({
+        id: d.id,
+        ...d.data(),
+      }));
+
+      setPosts(data);
+    } catch (error) {
+      console.error("Error cargando publicaciones:", error);
+    }
   };
 
-  // 🔹 Manejar archivos
+  useEffect(() => {
+    fetchPosts();
+  }, []);
+
+  // 🔹 Manejar archivos (solo preview por ahora)
   const handleFileChange = (e) => {
     setFiles(Array.from(e.target.files));
   };
 
-  // 🔹 Publicar
-  const publish = () => {
+  // 🔹 Publicar comunicado
+  const publish = async () => {
     if (!announcement.trim() && files.length === 0) {
       alert("Escribe un anuncio o adjunta un archivo.");
       return;
     }
 
-    const newPost = {
-      id: Date.now(),
-      text: announcement,
-      media: files.map((file) => ({
-        name: file.name,
-        type: file.type,
-        url: URL.createObjectURL(file),
-      })),
-      date: new Date().toISOString().split("T")[0],
-    };
+    try {
+      await addDoc(collection(db, "post"), {
+        authorName: "FitLife",
+        text: announcement,
+        media: [], // 🔜 aquí luego van las URLs de Cloudinary
+        visible: true,
+        createdAt: serverTimestamp(),
+      });
 
-    const updated = [newPost, ...posts];
-    savePosts(updated);
+      setAnnouncement("");
+      setFiles([]);
+      document.getElementById("fileInput").value = "";
 
-    setAnnouncement("");
-    setFiles([]);
-    document.getElementById("fileInput").value = "";
+      fetchPosts();
+    } catch (error) {
+      console.error("Error publicando:", error);
+    }
   };
 
-  // 🔹 ELIMINAR PUBLICACIÓN
-  const deletePost = (id) => {
-    const updated = posts.filter((post) => post.id !== id);
-    savePosts(updated);
+  // 🔹 Eliminar publicación
+  const deletePost = async (id) => {
+    try {
+      await deleteDoc(doc(db, "post", id));
+      fetchPosts();
+    } catch (error) {
+      console.error("Error eliminando publicación:", error);
+    }
   };
 
   return (
@@ -75,7 +98,9 @@ export default function Comunidad() {
         />
 
         <div className="mb-4">
-          <label className="block font-semibold mb-2">Seleccionar archivos</label>
+          <label className="block font-semibold mb-2">
+            Seleccionar archivos
+          </label>
 
           <input
             id="fileInput"
@@ -134,28 +159,13 @@ export default function Comunidad() {
               key={post.id}
               className="mb-6 border-b pb-4 dark:border-gray-700"
             >
-              <p className="font-semibold">{post.date}</p>
+              <p className="text-sm text-gray-500 mb-1">
+                {post.authorName} ·{" "}
+                {post.createdAt?.toDate().toLocaleDateString()}
+              </p>
+
               <p className="mb-3">{post.text}</p>
 
-              {/* Media */}
-              {post.media.length > 0 && (
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-3">
-                  {post.media.map((m, index) => (
-                    <div
-                      key={index}
-                      className="rounded overflow-hidden border dark:border-gray-700 bg-gray-50 dark:bg-gray-800"
-                    >
-                      {m.type.startsWith("image/") ? (
-                        <img src={m.url} alt="" className="h-32 w-full object-cover" />
-                      ) : (
-                        <video src={m.url} controls className="h-32 w-full" />
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/*  BOTÓN ELIMINAR */}
               <button
                 onClick={() => deletePost(post.id)}
                 className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded"
