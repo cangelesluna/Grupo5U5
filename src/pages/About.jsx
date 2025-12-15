@@ -40,7 +40,6 @@ function AboutUs() {
   return (
     <section className="relative bg-gradient-to-b from-fuchsia-200 via-purple-100 to-white dark:from-gray-900 dark:via-gray-900 dark:to-gray-950 pt-20 pb-40 -mb-40 px-6 overflow-hidden">
       {/* Glow decorativo */}
-      <div className="hidden md:block absolute -top-32 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-fuchsia-400/30 blur-3xl rounded-full pointer-events-none" />
 
       <div className="relative max-w-6xl mx-auto text-center space-y-20">
         {/* TÍTULO */}

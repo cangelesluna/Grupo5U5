@@ -6,13 +6,12 @@ function MisionVision() {
   return (
     <section className="relative bg-gradient-to-b from-fuchsia-200 via-purple-100 to-white dark:from-gray-900 dark:via-gray-900 dark:to-gray-950 px-6 pt-20 pb-40 overflow-hidden">
       {/* Glow decorativo */}
-      <div className="hidden md:block absolute -top-40 left-1/2 -translate-x-1/2 w-[520px] h-[520px] bg-fuchsia-400/25 blur-3xl rounded-full pointer-events-none" />
 
       <div className="relative max-w-4xl mx-auto space-y-24">
         {/* HERO */}
         <div className="text-center animate-fade-up">
           <h1 className="relative inline-block mb-6">
-            <span className="text-4xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-700 via-pink-600 to-purple-600 dark:from-fuchsia-400 dark:via-pink-400 dark:to-purple-400">
+            <span className="text-4xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-700 via-pink-600 to-purple-600 dark:from-fuchsia-400 dark:via-pink-400 dark:to-purple-400 tracking-tight">
               Nuestra Misión y Visión
             </span>
             <span className="absolute -inset-3 bg-gradient-to-r from-fuchsia-400/30 to-pink-400/30 blur-2xl opacity-60 -z-10" />

@@ -20,13 +20,11 @@ export default function Comunidad() {
   const fetchPosts = async () => {
     try {
       const q = query(collection(db, "post"), orderBy("createdAt", "desc"));
-
       const snap = await getDocs(q);
       const data = snap.docs.map((d) => ({
         id: d.id,
         ...d.data(),
       }));
-
       setPosts(data);
     } catch (error) {
       console.error("Error cargando publicaciones:", error);
@@ -42,6 +40,22 @@ export default function Comunidad() {
     setFiles(Array.from(e.target.files));
   };
 
+  // 🔹 Función para subir archivos a Cloudinary
+  const uploadToCloudinary = async (file) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", "TU_UPLOAD_PRESET"); // <- tu preset
+    const res = await fetch(
+      "https://api.cloudinary.com/v1_1/TU_CLOUD_NAME/upload",
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+    const data = await res.json();
+    return data.secure_url; // URL pública
+  };
+
   // 🔹 Publicar comunicado
   const publish = async () => {
     if (!announcement.trim() && files.length === 0) {
@@ -50,10 +64,18 @@ export default function Comunidad() {
     }
 
     try {
+      // Subir archivos y obtener URLs
+      const mediaUrls = [];
+      for (const file of files) {
+        const url = await uploadToCloudinary(file);
+        mediaUrls.push(url);
+      }
+
+      // Guardar post en Firestore
       await addDoc(collection(db, "post"), {
         authorName: "FitLife",
         text: announcement,
-        media: [], // 🔜 aquí luego van las URLs de Cloudinary
+        media: mediaUrls,
         visible: true,
         createdAt: serverTimestamp(),
       });
@@ -165,6 +187,25 @@ export default function Comunidad() {
               </p>
 
               <p className="mb-3">{post.text}</p>
+
+              {/* Renderizar media */}
+              {post.media?.map((url, idx) =>
+                url.endsWith(".mp4") ? (
+                  <video
+                    key={idx}
+                    src={url}
+                    controls
+                    className="w-full h-32 rounded mb-2"
+                  />
+                ) : (
+                  <img
+                    key={idx}
+                    src={url}
+                    alt=""
+                    className="w-full h-32 object-cover rounded mb-2"
+                  />
+                )
+              )}
 
               <button
                 onClick={() => deletePost(post.id)}

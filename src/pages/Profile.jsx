@@ -21,7 +21,7 @@ function Profile() {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  // 🔥 Obtener info de los planes
+  // 🔹 Obtener info de los planes
   const fetchPlansInfo = async (ids) => {
     if (!ids || ids.length === 0) {
       setPlanesInfo([]);
@@ -30,17 +30,12 @@ function Profile() {
 
     const plansRef = collection(db, "plans");
     const snap = await getDocs(plansRef);
-
-    const allPlans = snap.docs.map((d) => ({
-      id: d.id,
-      ...d.data(),
-    }));
-
+    const allPlans = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
     const filtered = allPlans.filter((p) => ids.includes(p.id));
     setPlanesInfo(filtered);
   };
 
-  // 🔥 Obtener comunicados visibles
+  // 🔹 Obtener comunicados visibles
   const fetchPosts = async () => {
     try {
       const q = query(
@@ -48,20 +43,15 @@ function Profile() {
         where("visible", "==", true),
         orderBy("createdAt", "desc")
       );
-
       const snap = await getDocs(q);
-      const data = snap.docs.map((d) => ({
-        id: d.id,
-        ...d.data(),
-      }));
-
+      const data = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
       setPosts(data);
     } catch (err) {
       console.error("Error cargando comunicados:", err);
     }
   };
 
-  // 🔥 Cargar datos del usuario
+  // 🔹 Cargar datos del usuario
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (!currentUser) {
@@ -116,11 +106,8 @@ function Profile() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6 transition-colors">
       <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* ================= COMUNICADOS (IZQUIERDA) ================= */}
-        <aside
-          className="bg-white dark:bg-gray-800 rounded-xl shadow p-5 transition
-                          lg:col-span-1 max-h-[80vh] overflow-y-auto"
-        >
+        {/* ================= COMUNICADOS ================= */}
+        <aside className="bg-white dark:bg-gray-800 rounded-xl shadow p-5 transition lg:col-span-1 max-h-[80vh] overflow-y-auto">
           <h2 className="text-xl font-bold mb-4 text-gray-800 dark:text-white border-b pb-2 border-gray-200 dark:border-gray-700">
             📢 Comunicados
           </h2>
@@ -145,6 +132,7 @@ function Profile() {
                     {post.text}
                   </p>
 
+                  {/* Renderizar media */}
                   {post.media?.length > 0 && (
                     <div className="grid grid-cols-2 gap-2">
                       {post.media.map((m, i) =>
@@ -153,14 +141,17 @@ function Profile() {
                             key={i}
                             src={m.url}
                             alt=""
-                            className="rounded-md h-24 w-full object-cover"
+                            className="rounded-md w-full h-40 object-cover hover:scale-105 transition-transform"
                           />
                         ) : (
                           <video
                             key={i}
                             src={m.url}
-                            controls
-                            className="rounded-md h-24 w-full"
+                            controls // Para poder pausar/reproducir
+                            autoPlay // Reproduce automáticamente
+                            muted // Necesario para autoplay
+                            loop // Se repite automáticamente
+                            className="rounded-md w-full h-40 object-cover hover:scale-105 transition-transform"
                           />
                         )
                       )}
@@ -172,7 +163,7 @@ function Profile() {
           )}
         </aside>
 
-        {/* ================= PERFIL + PLANES (DERECHA) ================= */}
+        {/* ================= PERFIL + PLANES ================= */}
         <main className="lg:col-span-2 space-y-6">
           {/* PERFIL */}
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6 transition">
@@ -183,9 +174,7 @@ function Profile() {
 
               <button
                 onClick={handleLogout}
-                className="px-4 py-2 bg-red-100 dark:bg-red-900/40 
-                text-red-600 dark:text-red-300 rounded hover:bg-red-200 
-                dark:hover:bg-red-900 transition text-sm font-semibold"
+                className="px-4 py-2 bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-300 rounded hover:bg-red-200 dark:hover:bg-red-900 transition text-sm font-semibold"
               >
                 Cerrar Sesión
               </button>
