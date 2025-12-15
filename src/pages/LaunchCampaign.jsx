@@ -2,8 +2,6 @@ import React, { useEffect, useState, useRef } from "react";
 import PROMO1 from "../assets/PROMO1.mp4";
 import PROMO2 from "../assets/PROMO2.mp4";
 import PROMO3 from "../assets/PROMO3.mp4";
-import promo from "../assets/promo.jpg";
-import promo3 from "../assets/promo3.png";
 import promo7 from "../assets/promo7.mp4";
 import video1 from "../assets/video1.mp4";
 import video2 from "../assets/video2.mp4";
@@ -14,20 +12,35 @@ import PROMOCIONAL2 from "../assets/PROMOCIONAL2.png";
 // =======================================================
 const PromoVideo = ({ src, title, text, active }) => {
   const videoRef = useRef(null);
+  const containerRef = useRef(null);
 
   useEffect(() => {
-    if (!videoRef.current) return;
+    if (!videoRef.current || !containerRef.current) return;
 
-    if (active) {
-      videoRef.current.play();
-    } else {
-      videoRef.current.pause();
-      videoRef.current.currentTime = 0;
-    }
+    const video = videoRef.current;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && active) {
+          video.play().catch(() => {});
+        } else {
+          video.pause();
+          video.currentTime = 0;
+        }
+      },
+      {
+        threshold: 0.6, // 60% visible
+      }
+    );
+
+    observer.observe(containerRef.current);
+
+    return () => observer.disconnect();
   }, [active]);
 
   return (
     <div
+      ref={containerRef}
       className={`transition-all duration-500 ease-out flex-shrink-0
         ${active ? "scale-100 opacity-100" : "scale-90 opacity-60 blur-[1px]"}
       `}
@@ -105,8 +118,10 @@ const LaunchCampaign = () => {
     if (!containerRef.current) return;
     const scrollX = containerRef.current.scrollLeft;
     const cardWidth = 360 + 40;
-    const index = Math.round(scrollX / cardWidth);
-    setActiveIndex(index);
+    const rawIndex = Math.round(scrollX / cardWidth);
+    const normalizedIndex = rawIndex % videos.length;
+
+    setActiveIndex(normalizedIndex);
 
     const total = videos.length * cardWidth;
     const maxScroll = total * 2;
@@ -269,7 +284,11 @@ const LaunchCampaign = () => {
           "
         >
           {infiniteVideos.map((video, index) => (
-            <PromoVideo key={index} {...video} active={index === activeIndex} />
+            <PromoVideo
+              key={index}
+              {...video}
+              active={index % videos.length === activeIndex}
+            />
           ))}
         </div>
       </section>
