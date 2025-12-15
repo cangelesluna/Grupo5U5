@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { collection, addDoc, Timestamp } from "firebase/firestore";
+import { db } from "../lib/firebase";
 
 function Contact() {
   const [formData, setFormData] = useState({
@@ -18,7 +20,7 @@ function Contact() {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const newErrors = {};
 
@@ -41,14 +43,31 @@ function Contact() {
     setErrors(newErrors);
 
     if (Object.keys(newErrors).length === 0) {
-      alert("✅ Formulario enviado correctamente. ¡Gracias por contactarnos!");
-      setFormData({
-        username: "",
-        phoneNum: "",
-        email: "",
-        message: "",
-        contact: "",
-      });
+      try {
+        await addDoc(collection(db, "contactos"), {
+          nombre: formData.username,
+          telefono: formData.phoneNum,
+          email: formData.email,
+          mensaje: formData.message,
+          medioContacto: formData.contact,
+          fecha: Timestamp.now(),
+        });
+
+        alert("✅ Formulario enviado correctamente. ¡Gracias por contactarnos!");
+
+        setFormData({
+          username: "",
+          phoneNum: "",
+          email: "",
+          message: "",
+          contact: "",
+        });
+
+        setErrors({});
+      } catch (error) {
+        console.error("Error al enviar formulario:", error);
+        alert("❌ Ocurrió un error al enviar el formulario");
+      }
     }
   };
 

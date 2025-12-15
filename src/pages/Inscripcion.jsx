@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import { collection, addDoc, Timestamp } from "firebase/firestore";
+import { db } from "../lib/firebase";
+import { useState } from "react";
 
 const Inscripcion = () => {
   const [formData, setFormData] = useState({
@@ -60,7 +62,7 @@ const Inscripcion = () => {
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const {
       nombre,
@@ -137,6 +139,27 @@ const Inscripcion = () => {
       "12_meses": "12 meses",
       indefinido: "tiempo indefinido",
     }[duracion];
+
+    try {
+      await addDoc(collection(db, "inscripciones"), {
+        nombre,
+        correo,
+        edad: parseInt(edad),
+        genero,
+        plan,
+        duracion,
+        objetivo,
+        condicion,
+        preferencias,
+        precioFinal,
+        fecha: Timestamp.now(),
+        estado: "pendiente",
+      });
+    } catch (error) {
+      console.error("Error al guardar inscripción:", error);
+      setMensaje("❌ Ocurrió un error al registrar tu inscripción");
+      return;
+    }
 
     setMensaje(
       `¡Gracias por inscribirte, ${nombre}! 💚
