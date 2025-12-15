@@ -8,39 +8,24 @@ import video2 from "../assets/video2.mp4";
 import PROMOCIONAL2 from "../assets/PROMOCIONAL2.png";
 
 // =======================================================
-// VIDEO CARD (ESTILO iTUNES)
+// VIDEO CARD (ESTILO iTUNES) — OPTIMIZADO
 // =======================================================
 const PromoVideo = ({ src, title, text, active }) => {
   const videoRef = useRef(null);
-  const containerRef = useRef(null);
 
   useEffect(() => {
-    if (!videoRef.current || !containerRef.current) return;
-
     const video = videoRef.current;
+    if (!video) return;
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && active) {
-          video.play().catch(() => {});
-        } else {
-          video.pause();
-          video.currentTime = 0;
-        }
-      },
-      {
-        threshold: 0.6, // 60% visible
-      }
-    );
-
-    observer.observe(containerRef.current);
-
-    return () => observer.disconnect();
+    if (active) {
+      video.play().catch(() => {});
+    } else {
+      video.pause();
+    }
   }, [active]);
 
   return (
     <div
-      ref={containerRef}
       className={`transition-all duration-500 ease-out flex-shrink-0
         ${active ? "scale-100 opacity-100" : "scale-90 opacity-60 blur-[1px]"}
       `}
@@ -52,6 +37,7 @@ const PromoVideo = ({ src, title, text, active }) => {
           muted
           loop
           playsInline
+          preload="metadata"
           className="w-full aspect-[4/5] object-cover rounded-3xl shadow-2xl"
         />
 
@@ -71,6 +57,7 @@ const LaunchCampaign = () => {
   const [showPromo, setShowPromo] = useState(true);
   const [activeIndex, setActiveIndex] = useState(0);
   const containerRef = useRef(null);
+  const ticking = useRef(false);
 
   const videos = [
     {
@@ -99,41 +86,26 @@ const LaunchCampaign = () => {
       text: "Avanza a tu ritmo, sin presión.",
     },
   ];
-  const infiniteVideos = [...videos, ...videos, ...videos];
 
   useEffect(() => {
     setShowPromo(true);
-
-    // Posicionar el scroll al centro
-    requestAnimationFrame(() => {
-      if (containerRef.current) {
-        const cardWidth = 360 + 40;
-        containerRef.current.scrollLeft = videos.length * cardWidth;
-        setActiveIndex(videos.length);
-      }
-    });
   }, []);
 
   const handleScroll = () => {
-    if (!containerRef.current) return;
-    const scrollX = containerRef.current.scrollLeft;
-    const cardWidth = 360 + 40;
-    const rawIndex = Math.round(scrollX / cardWidth);
-    const normalizedIndex = rawIndex % videos.length;
+    if (!containerRef.current || ticking.current) return;
+    ticking.current = true;
 
-    setActiveIndex(normalizedIndex);
+    requestAnimationFrame(() => {
+      const container = containerRef.current;
+      const firstCard = container.firstChild;
+      if (!firstCard) return;
 
-    const total = videos.length * cardWidth;
-    const maxScroll = total * 2;
+      const cardWidth = firstCard.offsetWidth + 40;
+      const index = Math.round(container.scrollLeft / cardWidth);
 
-    // 🌀 REPOSICIÓN INVISIBLE
-    if (scrollX <= cardWidth) {
-      containerRef.current.scrollLeft = scrollX + total;
-    }
-
-    if (scrollX >= maxScroll) {
-      containerRef.current.scrollLeft = scrollX - total;
-    }
+      setActiveIndex(index % videos.length);
+      ticking.current = false;
+    });
   };
 
   return (
@@ -166,10 +138,10 @@ const LaunchCampaign = () => {
           </div>
         </div>
       )}
+
       {/* HERO */}
       <section className="relative w-full bg-gradient-to-br from-pink-200 via-fuchsia-200 to-purple-200 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 overflow-hidden">
         <div className="grid md:grid-cols-2 min-h-[720px]">
-          {/* TEXTO */}
           <div className="px-6 py-12 md:px-14 md:py-16 flex flex-col justify-center">
             <span className="inline-block mb-4 px-4 py-1 text-xs font-semibold text-white bg-fuchsia-600 rounded-full">
               NUEVO · LANZAMIENTO
@@ -205,7 +177,6 @@ const LaunchCampaign = () => {
                 Empieza hoy desde casa y nota el cambio paso a paso.
               </p>
             </div>
-
             <div className="mt-5 flex flex-wrap gap-2 max-w-xl">
               <span className="px-3 py-1 bg-white/80 dark:bg-gray-800 rounded-full text-xs font-medium text-fuchsia-700 dark:text-fuchsia-300 shadow">
                 🏠 Entrena en casa
@@ -238,7 +209,6 @@ const LaunchCampaign = () => {
             </div>
           </div>
 
-          {/* VIDEO DERECHA */}
           <div className="hidden md:block relative">
             <video
               src={promo7}
@@ -256,39 +226,19 @@ const LaunchCampaign = () => {
       {/* CARRUSEL iTUNES */}
       <section
         id="promociones"
-        className="w-full bg-fuchsia-200  dark:bg-gray-900 py-24 -mb-40 pb-40"
+        className="w-full bg-fuchsia-200 dark:bg-gray-900 py-24 -mb-40 pb-40"
       >
-        <h2
-          className="
-  text-center 
-  text-4xl sm:text-5xl 
-  font-extrabold 
-  text-transparent bg-clip-text 
-  bg-gradient-to-r from-fuchsia-700 via-pink-600 to-purple-600
-  dark:from-fuchsia-400 dark:via-pink-400 dark:to-purple-400
-  mb-14
-  tracking-tight
-  drop-shadow-sm
-"
-        >
+        <h2 className="text-center text-4xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-700 via-pink-600 to-purple-600 dark:from-fuchsia-400 dark:via-pink-400 dark:to-purple-400 mb-14 tracking-tight drop-shadow-sm">
           Descubre FitLife en acción
         </h2>
 
         <div
           ref={containerRef}
           onScroll={handleScroll}
-          className="
-            flex gap-10 px-[calc(45vw-180px)]
-            overflow-x-auto scroll-smooth no-scrollbar
-            snap-x snap-mandatory
-          "
+          className="flex gap-10 px-[calc(45vw-180px)] overflow-x-auto scroll-smooth no-scrollbar snap-x snap-mandatory"
         >
-          {infiniteVideos.map((video, index) => (
-            <PromoVideo
-              key={index}
-              {...video}
-              active={index % videos.length === activeIndex}
-            />
+          {videos.map((video, index) => (
+            <PromoVideo key={index} {...video} active={index === activeIndex} />
           ))}
         </div>
       </section>
