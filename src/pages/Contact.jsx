@@ -53,7 +53,9 @@ function Contact() {
           fecha: Timestamp.now(),
         });
 
-        alert("✅ Formulario enviado correctamente. ¡Gracias por contactarnos!");
+        alert(
+          "✅ Formulario enviado correctamente. ¡Gracias por contactarnos!"
+        );
 
         setFormData({
           username: "",
@@ -76,8 +78,11 @@ function Contact() {
       {/* Barra de introducción */}
       <section className="bg-fuchsia-200 dark:bg-gray-900 py-16 px-6 transition-colors duration-500">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-4xl md:text-4xl font-bold text-fuchsia-900 mb-4 dark:text-fuchsia-700">
-            ¡Hablemos de una vida saludable!
+          <h1 className="relative inline-block mb-6">
+            <span className="text-4xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-700 via-pink-600 to-purple-600 dark:from-fuchsia-400 dark:via-pink-400 dark:to-purple-400">
+              ¡Hablemos de una vida saludable!
+            </span>
+            <span className="absolute -inset-3 bg-gradient-to-r from-fuchsia-400/30 to-pink-400/30 blur-2xl opacity-60 -z-10" />
           </h1>
           <p className="text-gray-700 dark:text-gray-300 max-w-3xl mx-auto transition-colors duration-500">
             ¿Quieres transformar tu estilo de vida por uno mucho más sostenible

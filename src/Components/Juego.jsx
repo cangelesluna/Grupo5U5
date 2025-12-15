@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import confetti from "canvas-confetti";
 
 const habitos = [
   {
@@ -19,37 +20,79 @@ const habitos = [
   },
 ];
 
-const Juego = ({ onClose }) => {
+// Configuración
+const DURACION_JUEGO = 2200;
+const INTERVALO_PREVIEW = 120;
+const INTERVALO_BARRA = 100;
+
+const Juego = ({ onClose, onFinish }) => {
   const [resultado, setResultado] = useState(null);
   const [preview, setPreview] = useState(habitos[0]);
   const [jugando, setJugando] = useState(false);
   const [progreso, setProgreso] = useState(0);
+  const [yaJugo, setYaJugo] = useState(false);
+
+  const intervaloPreview = useRef(null);
+  const intervaloBarra = useRef(null);
+  const timeoutFinal = useRef(null);
+
+  const limpiarTimers = () => {
+    clearInterval(intervaloPreview.current);
+    clearInterval(intervaloBarra.current);
+    clearTimeout(timeoutFinal.current);
+  };
+
+  useEffect(() => {
+    return () => limpiarTimers();
+  }, []);
+
+  const lanzarConfeti = () => {
+    confetti({
+      particleCount: 90,
+      spread: 70,
+      origin: { y: 0.6 },
+      colors: ["#ec4899", "#d946ef", "#f472b6", "#a855f7"],
+    });
+  };
 
   const jugar = () => {
+    limpiarTimers();
+
     setResultado(null);
     setJugando(true);
     setProgreso(0);
+    setYaJugo(false);
 
-    let ticks = 0;
-
-    const intervalo = setInterval(() => {
+    intervaloPreview.current = setInterval(() => {
       setPreview(habitos[Math.floor(Math.random() * habitos.length)]);
-      ticks++;
-    }, 120);
+    }, INTERVALO_PREVIEW);
 
-    const barra = setInterval(() => {
+    intervaloBarra.current = setInterval(() => {
       setProgreso((p) => Math.min(p + 5, 100));
-    }, 100);
+    }, INTERVALO_BARRA);
 
-    setTimeout(() => {
-      clearInterval(intervalo);
-      clearInterval(barra);
+    timeoutFinal.current = setTimeout(() => {
+      limpiarTimers();
 
       const final = habitos[Math.floor(Math.random() * habitos.length)];
+
       setResultado(final);
-      setJugando(false);
       setPreview(final);
-    }, 2200);
+      setJugando(false);
+      setYaJugo(true);
+
+      lanzarConfeti();
+    }, DURACION_JUEGO);
+  };
+
+  const cerrarJuego = () => {
+    limpiarTimers();
+    onClose();
+
+    // 👉 SOLO muestra valoración si ya jugó
+    if (yaJugo) {
+      onFinish?.();
+    }
   };
 
   return (
@@ -57,7 +100,7 @@ const Juego = ({ onClose }) => {
       <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 w-[90%] max-w-md text-center shadow-xl relative">
         {/* Cerrar */}
         <button
-          onClick={onClose}
+          onClick={cerrarJuego}
           className="absolute top-3 right-3 text-xl hover:scale-110 transition"
         >
           ❌
@@ -67,10 +110,11 @@ const Juego = ({ onClose }) => {
           🎲 ¿Qué hábito saludable eres?
         </h3>
 
-        {/* CARTA CENTRAL */}
+        {/* CARTA */}
         <div
           className={`rounded-xl border p-4 mb-4 transition-all duration-300
-          ${jugando ? "animate-pulse scale-105" : "scale-100"}`}
+            ${jugando ? "animate-pulse scale-105" : "scale-100"}
+          `}
         >
           <h4 className="text-xl font-bold mb-2">{preview.titulo}</h4>
 
@@ -83,7 +127,7 @@ const Juego = ({ onClose }) => {
           </p>
         </div>
 
-        {/* BARRA DE PROGRESO */}
+        {/* BARRA */}
         {jugando && (
           <div className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden mb-4">
             <div
@@ -93,7 +137,7 @@ const Juego = ({ onClose }) => {
           </div>
         )}
 
-        {/* BOTONES */}
+        {/* BOTÓN */}
         {!jugando && (
           <button
             onClick={jugar}

@@ -4,96 +4,90 @@ import visionImg from "../assets/vision.png";
 
 function MisionVision() {
   return (
-    <section className="bg-fuchsia-200 dark:bg-gray-900 text-gray-800 dark:text-gray-800 px-6 pt-12 -mb-40 pb-50">
-      <div className="max-w-4xl mx-auto">
-        {/* Hero */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-fuchsia-900  dark:text-fuchsia-700 mb-4">
-            Nuestra Misión y Visión
+    <section className="relative bg-gradient-to-b from-fuchsia-200 via-purple-100 to-white dark:from-gray-900 dark:via-gray-900 dark:to-gray-950 px-6 pt-20 pb-40 overflow-hidden">
+      {/* Glow decorativo */}
+      <div className="hidden md:block absolute -top-40 left-1/2 -translate-x-1/2 w-[520px] h-[520px] bg-fuchsia-400/25 blur-3xl rounded-full pointer-events-none" />
+
+      <div className="relative max-w-4xl mx-auto space-y-24">
+        {/* HERO */}
+        <div className="text-center animate-fade-up">
+          <h1 className="relative inline-block mb-6">
+            <span className="text-4xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-700 via-pink-600 to-purple-600 dark:from-fuchsia-400 dark:via-pink-400 dark:to-purple-400">
+              Nuestra Misión y Visión
+            </span>
+            <span className="absolute -inset-3 bg-gradient-to-r from-fuchsia-400/30 to-pink-400/30 blur-2xl opacity-60 -z-10" />
           </h1>
-          <p className="text-lg text-gray-600  dark:text-gray-300">
-            FitLife, tu aliado para el comienzo de una vida saludable y
-            equilibrada.
+
+          <p className="text-lg text-gray-700 dark:text-gray-300 max-w-2xl mx-auto">
+            FitLife, tu aliado para comenzar una vida saludable, equilibrada y
+            sostenible.
           </p>
         </div>
 
-        {/* Misión */}
-        <div className="bg-purple-100 dark:bg-gray-800 p-8 rounded-2xl shadow-md mb-16 transition-colors duration-500">
+        {/* MISIÓN */}
+        <div className="bg-white/70 dark:bg-gray-800/80 backdrop-blur p-10 rounded-3xl shadow-xl animate-fade-up">
           <img
             src={misionImg}
-            alt="Misión"
-            className="w-45 h-45 object-center rounded-lg mb-4 mx-auto block"
+            alt="Misión FitLife"
+            className="w-36 h-36 mx-auto mb-6 rounded-2xl object-contain ring-4 ring-fuchsia-300 hover:ring-fuchsia-500 transition"
           />
 
-          <h2 className="text-2xl text-center font-semibold text-fuchsia-800  dark:text-fuchsia-700 mb-3">
-            Nuestra Misión{" "}
+          <h2 className="relative inline-block text-3xl font-extrabold text-fuchsia-900 dark:text-fuchsia-500 mb-6">
+            Nuestra Misión
+            <span className="absolute left-0 -bottom-2 w-1/2 h-1 bg-gradient-to-r from-fuchsia-400 to-pink-400 rounded-full" />
           </h2>
 
-          <p className="text-gray-700  dark:text-gray-300 mb-4">
-            Promover un estilo de vida saludable, brindando a las personas
-            herramientas prácticas y personalizadas para mejorar su bienestar
-            físico, mental y emocional. A través de recursos como el cálculo del
-            IMC, planes de alimentación equilibrada y rutinas de ejercicio
-            adaptadas a su nivel de actividad física, buscamos empoderar a
-            nuestros usuarios para que tomen el control de su salud y alcancen
-            su mejor versión.
+          <p className="text-gray-700 dark:text-gray-300 mb-6 leading-relaxed">
+            Promover un estilo de vida saludable brindando herramientas
+            prácticas y personalizadas para mejorar el bienestar físico, mental
+            y emocional. A través de recursos como el cálculo del IMC, planes de
+            alimentación equilibrada y rutinas de ejercicio adaptadas, buscamos
+            empoderar a nuestros usuarios para que alcancen su mejor versión.
           </p>
-          <div>
-            <h3 className="font-medium text-lg mb-2  dark:text-gray-400">
-              Para lograrlo nos enfocamos en:
-            </h3>
-            <ul className="list-disc pl-6 text-gray-700  dark:text-gray-300 space-y-1">
-              <li>
-                Personalización de su plan de alimentación y entrenamiento
-              </li>
-              <li>
-                Gestionar eficientemente su tiempo con rutinas adaptadas a su
-                estilo de vida
-              </li>
-              <li>
-                Desarrollar hábitos saludables y sostenibles a largo plazo
-              </li>
-            </ul>
-          </div>
+
+          <h3 className="font-semibold text-lg mb-3 text-gray-800 dark:text-gray-200">
+            Para lograrlo nos enfocamos en:
+          </h3>
+
+          <ul className="list-disc pl-6 space-y-2 text-gray-700 dark:text-gray-300">
+            <li>Personalización de planes de alimentación y entrenamiento</li>
+            <li>Gestión eficiente del tiempo con rutinas adaptadas</li>
+            <li>Desarrollo de hábitos saludables y sostenibles</li>
+          </ul>
         </div>
 
-        {/* Visión */}
-        <div className="bg-purple-100 dark:bg-gray-800 p-8 rounded-2xl shadow-md mb-16 transition-colors duration-500">
+        {/* VISIÓN */}
+        <div className="bg-white/70 dark:bg-gray-800/80 backdrop-blur p-10 rounded-3xl shadow-xl animate-fade-up delay-100">
           <img
             src={visionImg}
-            alt="Visión"
-            className="w-45 h-45 object-center rounded-lg mb-4 mx-auto block"
+            alt="Visión FitLife"
+            className="w-36 h-36 mx-auto mb-6 rounded-2xl object-contain ring-4 ring-fuchsia-300 hover:ring-fuchsia-500 transition"
           />
-          <h1 className="text-2xl text-center font-semibold text-fuchsia-800 dark:text-fuchsia-700 mb-3">
+
+          <h2 className="relative inline-block text-3xl font-extrabold text-fuchsia-900 dark:text-fuchsia-500 mb-6">
             Nuestra Visión
-          </h1>
-          <p className="text-gray-700 mb-4  dark:text-gray-300">
+            <span className="absolute left-0 -bottom-2 w-1/2 h-1 bg-gradient-to-r from-fuchsia-400 to-pink-400 rounded-full" />
+          </h2>
+
+          <p className="text-gray-700 dark:text-gray-300 mb-6 leading-relaxed">
             Ser la plataforma líder en bienestar integral, reconocida por su
-            innovación y efectividad, convirtiéndonos en tu aliado a la hora de
-            iniciar una vida saludable y equilibrada. Asimismo, aspiramos a
-            construir una comunidad global que comparta conocimientos,
-            experiencias y motivaciones.
+            innovación y efectividad, convirtiéndonos en el aliado ideal para
+            iniciar una vida saludable. Aspiramos a construir una comunidad
+            global que comparta conocimientos, experiencias y motivación.
           </p>
-          <div>
-            <h3 className="font-medium text-lg mb-2  dark:text-gray-400">
-              Hacia 2040 queremos:
-            </h3>
-            <ul className="list-disc pl-6 text-gray-700 space-y-1  dark:text-gray-300">
-              <li>
-                Ser la plataforma de bienestar integral más confiable y
-                utilizada del mundo
-              </li>
-              <li>
-                Innovar constantemente en tecnología y contenido para ofrecer la
-                mejor experiencia
-              </li>
-              <li>Ofrecer soluciones personalizadas y accesibles para todos</li>
-              <li>
-                Fomentar una comunidad global activa y comprometida con el
-                bienestar
-              </li>
-            </ul>
-          </div>
+
+          <h3 className="font-semibold text-lg mb-3 text-gray-800 dark:text-gray-200">
+            Hacia 2040 queremos:
+          </h3>
+
+          <ul className="list-disc pl-6 space-y-2 text-gray-700 dark:text-gray-300">
+            <li>
+              Ser la plataforma de bienestar integral más confiable del mundo
+            </li>
+            <li>Innovar constantemente en tecnología y contenido</li>
+            <li>Ofrecer soluciones accesibles y personalizadas</li>
+            <li>Fomentar una comunidad global activa y comprometida</li>
+          </ul>
         </div>
       </div>
     </section>

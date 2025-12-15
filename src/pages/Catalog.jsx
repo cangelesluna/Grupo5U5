@@ -119,9 +119,14 @@ const Catalogo = () => {
       />
 
       <div className="max-w-6xl mx-auto">
-        <h2 className="text-3xl font-bold text-center text-fuchsia-900 dark:text-fuchsia-700 mb-12">
-          Catálogo de Planes
-        </h2>
+        <div className="text-center">
+          <h1 className="relative inline-block mb-6">
+            <span className="text-4xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-700 via-pink-600 to-purple-600 dark:from-fuchsia-400 dark:via-pink-400 dark:to-purple-400">
+              Catálogo de planes
+            </span>
+            <span className="absolute -inset-3 bg-gradient-to-r from-fuchsia-400/30 to-pink-400/30 blur-2xl opacity-60 -z-10" />
+          </h1>
+        </div>
 
         {/* ===================== ENTRENAMIENTOS ===================== */}
         <div className="mb-16">

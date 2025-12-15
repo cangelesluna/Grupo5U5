@@ -1,19 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { collection, addDoc, Timestamp } from "firebase/firestore";
 import { db } from "../lib/firebase";
 
-const Valoracion = () => {
-  const [visible, setVisible] = useState(false);
+const Valoracion = ({ onClose }) => {
   const [mensaje, setMensaje] = useState("");
   const [votado, setVotado] = useState(false);
-
-  useEffect(() => {
-    const yaValoro = localStorage.getItem("valoracion_enviada");
-    if (!yaValoro) {
-      const timer = setTimeout(() => setVisible(true), 800);
-      return () => clearTimeout(timer);
-    }
-  }, []);
 
   const emojis = [
     { icono: "😍", texto: "Excelente" },
@@ -31,12 +22,11 @@ const Valoracion = () => {
         fecha: Timestamp.now(),
       });
 
-      localStorage.setItem("valoracion_enviada", "true");
       setMensaje("¡Gracias por valorar tu experiencia! 💚");
       setVotado(true);
 
       setTimeout(() => {
-        setVisible(false);
+        onClose();
       }, 1500);
     } catch (error) {
       console.error(error);
@@ -44,17 +34,13 @@ const Valoracion = () => {
     }
   };
 
-  if (!visible) return null;
-
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 w-[90%] max-w-md text-center shadow-xl">
+      <div className="relative bg-white dark:bg-gray-800 rounded-2xl p-6 w-[90%] max-w-md text-center shadow-xl animate-scale-in">
+        {/* Cerrar */}
         <button
-          onClick={() => {
-            localStorage.setItem("valoracion_enviada", "true");
-            setVisible(false);
-          }}
-          className="absolute top-4 right-4 text-xl"
+          onClick={onClose}
+          className="absolute top-4 right-4 text-xl hover:scale-110 transition"
         >
           ❌
         </button>
@@ -69,7 +55,7 @@ const Valoracion = () => {
               key={index}
               onClick={() => manejarClick(item.texto)}
               disabled={votado}
-              className="hover:scale-125 transition transform disabled:opacity-50"
+              className="hover:scale-125 transition transform disabled:opacity-40"
             >
               {item.icono}
             </button>
