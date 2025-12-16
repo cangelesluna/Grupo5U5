@@ -34,48 +34,46 @@ import "./index.css";
 // ---------------------------
 //   RUTAS CONFIGURADAS
 // ---------------------------
-const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <App />, // Layout principal con Header + Footer
-    children: [
-      { path: "/", element: <Home /> },
-      { path: "/about", element: <About /> },
-      { path: "/contact", element: <Contact /> },
-      { path: "/mision-vision", element: <MisionVision /> },
-      { path: "/inscripcion", element: <Inscripcion /> },
-      { path: "/catalogo", element: <Catalog /> }, // Catálogo normal
-      { path: "/login", element: <Login /> },
-      { path: "/perfil", element: <Profile /> },
-      { path: "/promociones", element: <LaunchCampaign /> },
-       
+const router = createBrowserRouter(
+  [
+    {
+      path: "/",
+      element: <App />,
+      children: [
+        { path: "/", element: <Home /> },
+        { path: "/about", element: <About /> },
+        { path: "/contact", element: <Contact /> },
+        { path: "/mision-vision", element: <MisionVision /> },
+        { path: "/inscripcion", element: <Inscripcion /> },
+        { path: "/catalogo", element: <Catalog /> },
+        { path: "/login", element: <Login /> },
+        { path: "/perfil", element: <Profile /> },
+        { path: "/promociones", element: <LaunchCampaign /> },
+        { path: "/cliente", element: <ClienteHome /> },
+      ],
+    },
+    {
+      path: "/admin",
+      element: (
+        <AdminRoute>
+          <Dashboard />
+        </AdminRoute>
+      ),
+      children: [
+        { path: "dashboard", element: <PlanList /> },
+        { path: "planes", element: <PlanList /> },
+        { path: "crear-plan", element: <PlanEditor /> },
+        { path: "editar-plan/:id", element: <PlanEditor /> },
+        { path: "monitoreo", element: <Monitoreo /> },
+        { path: "equipo", element: <Equipo /> },
+        { path: "ajustes", element: <Ajustes /> },
+        { path: "comunidad", element: <Comunidad /> },
+      ],
+    },
+  ],
+  { basename: "/Grupo5U5" }
+);
 
-      // Rutas de cliente
-      { path: "/cliente", element: <ClienteHome /> },
-    ],
-  },
-
-  // 🔐 RUTAS ADMIN
-  {
-    path: "/admin",
-    element: (
-      <AdminRoute>
-        <Dashboard /> {/* Dashboard con sidebar y Outlet */}
-      </AdminRoute>
-    ),
-    children: [
-      { path: "dashboard", element: <PlanList /> }, // contenido inicial
-      { path: "planes", element: <PlanList /> },
-      { path: "crear-plan", element: <PlanEditor /> },
-      { path: "editar-plan/:id", element: <PlanEditor /> },
-          { path: "monitoreo", element: <Monitoreo /> },
-  { path: "equipo", element: <Equipo /> },
-  {path: "ajustes", element: <Ajustes /> },
-  {path: "comunidad", element: <Comunidad /> },
-      // Aquí puedes agregar más secciones del admin
-    ],
-  },
-]);
 
 // ---------------------------
 //   RENDER PRINCIPAL
